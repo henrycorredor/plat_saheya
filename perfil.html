@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="css/index.css" />
+	<title>Saheya GuanLi V.1 - 2019</title>
+</head>
+<body class="perfil">
+	<nav class="oculto">
+		<div id="bot-desplegar">Desplegar</div>
+		<ul>
+			<li><a href="portada.html">Estado de cuenta</a></li>
+			<li><a href="prestamos.html">Préstamos</a></li>
+			<li><a href="pagos.html">Registrar pagos</a></li>
+			<li class="actual"><a href="perfil.html">Datos personales</a></li>
+		</ul>
+	</nav>
+	<div id="header-paquete">
+		<header>
+			<div id="foto-de-perfil"><img src="img/avatar-henry.jpg" height="78" width="78" alt="Henry A"></div>
+			<div id="titulos">
+				<h1>Henry Alejandro</h1>
+				<h2>Miembro activo - Encargado del IT</h2>
+			</div>
+		</header>
+	</div>
+	<section id="info-personal">
+		<div class="info-cont">
+			<div class="info-titulo">Cédula:</div>
+			<div class="info-contenido">1'074.123.521</div>
+		</div> <!--.info-cont-->
+		<div class="info-cont">
+			<div class="info-titulo">Fecha de nacimiento:</div>
+			<div class="info-contenido">6 de abril 1985</div>
+		</div> <!--.info-cont-->
+		<div class="info-cont">
+			<div class="info-titulo">Dirección:</div>
+			<div class="info-contenido">Avenida Siempre Viva 123 Springfield</div>
+		</div> <!--.info-cont-->
+		<div class="info-cont">
+			<div class="info-titulo">Teléfono celular:</div>
+			<div class="info-contenido">312 5847368</div>
+		</div> <!--.info-cont-->
+		<div class="info-cont">
+			<div class="info-titulo">Teléfono fijo:</div>
+			<div class="info-contenido">(8) 7489335</div>
+		</div> <!--.info-cont-->
+	</section>
+	<section id="contactos">
+		<div id="fiadores" class="contactos-contenedor">
+			<h2>Mis Fiadores</h2>
+			<div class="tarjeta-contacto">
+				<div class="avatar"><img src="fotos-avatar/83.jpg" width="80" height="80" alt="Geroge Myers"></div>
+				<span class='nombre-contacto'>George Myers</span>
+			</div><!--.tarjeta-contacto-->
+		</div><!--#fiadores-->
+		<div id="soy-fiador">
+			<h2>Soy fiador de</h2>
+			<div class="tarjeta-contacto">
+				<div class="avatar"><img src="fotos-avatar/9.jpg" width="80" height="80" alt="Anna Nguyen"></div>
+				<span class='nombre-contacto'>Anna Nguyen</span>
+			</div><!--.tarjeta-contacto-->
+		</div><!--#soy-fiador-->
+		<div id="mis-apadrinados">
+			<h2>Mis apadrinados</h2>
+			<div class="tarjeta-contacto">
+				<div class="avatar"><img src="fotos-avatar/78.jpg" width="80" height="80" alt="Henry Vargas"></div>
+				<span class='nombre-contacto'>Henry Vargas</span>
+			</div><!--.tarjeta-contacto-->
+		</div>
+		<div id="mis-padrinos">
+			<h2>Mis padrinos</h2>
+			<div class="tarjeta-contacto">
+				<div class="avatar"><img src="fotos-avatar/52.jpg" width="80" height="80" alt="Elizabeth Perry"></div>
+				<span class='nombre-contacto'>Elizabeth Perry</span>
+			</div><!--.tarjeta-contacto-->
+		</div><!--#mis-padrinos-->
+	</section>
+	<script>
+		const $botonMenu = document.getElementById("bot-desplegar")
+		const $menu = document.getElementsByTagName('nav')[0]
+
+		$botonMenu.addEventListener('click', ()=>{
+			$menu.classList.toggle("oculto")
+		})
+	</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="css/index.css" />
+	<title>Saheya GuanLi V.1 - 2019</title>
+</head>
+<body class="index">
+	<div id="contenedor-general">
+	<form id="formulario-ingreso" name="formulario-ingreso">
+		<h1>Sociedad Salamanca Hermanos y Asociados SAHEYA</h1>
+		<label for="usuario">Número de cédula</label>
+		<input type="text" id="usuario" autofocus placeholder="Número de cédula">
+		<label for="contrasena">Contraeña</label>
+		<input type="password" id="contrasena">
+		<div id="recordarContDiv">
+			<input type="checkbox" id="recordarContrasena">
+			<label for="recordarContrasena" id="labelRecordar">Recordar contraseña</label>
+		</div><!--#recordarContDiv-->
+		<input type="button" id="botonIngresar" name="Ingresar" value="Ingresar" />
+	</form>
+	</div><!--#contenedor-general-->
+	<script>
+		const elboton = document.getElementById('botonIngresar')
+		elboton.addEventListener('click',evento =>{
+			window.location.href = 'portada.html'
+		})
+	</script>
+</body>
+</html>
