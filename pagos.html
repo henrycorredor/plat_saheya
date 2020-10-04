@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" href="css/index.css" />
+	<title>Saheya GuanLi V.1 - 2019</title>
+</head>
+<body class="pagos">
+	<nav class="oculto">
+		<div id="bot-desplegar">Desplegar</div>
+		<ul>
+			<li><a href="portada.html">Estado de cuenta</a></li>
+			<li><a href="prestamos.html">Préstamos</a></li>
+			<li class="actual"><a href="pagos.html">Registrar pagos</a></li>
+			<li><a href="perfil.html">Datos personales</a></li>
+		</ul>
+	</nav>
+	<div id="header-paquete">
+		<header>
+			<div id="foto-de-perfil"><img src="img/avatar-henry.jpg" height="78" width="78" alt="Henry A"></div>
+			<div id="titulos">
+				<h1>Henry Alejandro</h1>
+				<h2>Miembro activo - Encargado del IT</h2>
+			</div>
+		</header>
+	</div>
+	<section id="registrar-pago-form">
+		<div id="foto-factura">
+			Aquí va un espacio para prender la cámara y tomar una foto
+			<!-- aquí va el codigo para activar la cámara y tomar la foto-->
+		</div> <!-- #foto-factura -->
+		<form action="">
+			<div class="cont-labels">
+				<label for="monto">Monto registrado: </label>
+				<label for="proposito">Propósito</label>
+			</div>
+			<div class="cont-info">
+				<input type="number" id="monto">
+				<select id="proposito">
+					<option>7a cuota préstamo #0002</option>
+					<option>Abono a capital</option>
+				</select>
+			</div>
+		</form>
+		<div id="boton-anadir">Añadir propósito</div>
+	</section> <!--.registrar-pago-form-->
+	<section id="lista-registros-pago">
+		<div class="tabla-registros">
+		<div class="registro-entrada en-analisis">
+			<span class="en-analisis">En análisis</span>
+			<div class=factura>
+				<img src="fotos-facturas/factura02.jpg" width="140" height="62">
+			</div>
+			<div class="info">
+				<span class="fecha">1 de marzo del 2019</span>
+				<span class="valor">$230.000</span>
+				<span class="motivo">
+					<ul>
+						<li>Cuota 6 préstamo #0002</li>
+						<li>Aporte mensual a capital</li>
+					</ul>
+				</span>
+				<span class="notas">Pagado en una sola transacción</span>
+			</div> <!-- .info -->
+		</div> <!-- registro-entrada -->
+
+		<div class="registro-entrada">
+				<div class=factura>
+					<img src="fotos-facturas/factura01.jpg" width="140" height="79" alt="factura">
+				</div>
+				<div class="info">
+					<span class="fecha">14 de febrero</span>
+					<span class="valor">$30.000</span>
+					<span class="motivo">
+						<ul>
+							<li>Aporte mensual a capital</li>
+						</ul>
+					</span>
+					<span class="notas">Pago realizado en la sucursal de Bancolombia al frente del Tía</span>
+				</div> <!-- .info -->
+			</div> <!-- registro-entrada -->
+		<div class="registro-entrada">
+			<div class=factura>
+				<img src="fotos-facturas/factura02.jpg" width="140" height="62" >
+			</div>
+			<div class="info">
+				<span class="fecha">1 de marzo del 2019</span>
+				<span class="valor">$230.000</span>
+				<span class="motivo">
+					<ul>
+						<li>Cuota 6 préstamo #0002</li>
+						<li>Aporte mensual a capital</li>
+					</ul>
+				</span>
+				<span class="notas">Pagado en una sola transacción</span>
+			</div> <!-- .info -->
+		</div> <!-- registro-entrada -->
+
+		<div class="registro-entrada">
+			<div class=factura>
+				<img src="fotos-facturas/factura01.jpg" width="140" height="79" >
+			</div>
+			<div class="info">
+				<span class="fecha">9 de enero del 2019</span>
+				<span class="valor">$230.000</span>
+				<span class="motivo">
+					<ul>
+						<li>Cuota 4 préstamo #0002</li>
+						<li>Aporte mensual a capital</li>
+					</ul>	
+				</span>
+				<span class="notas">Pagado en una sola transacción</span>
+			</div> <!-- .info -->
+		</div> <!-- registro-entrada -->
+
+		<div class="registro-entrada">
+			<div class=factura>
+				<img src="fotos-facturas/factura02.jpg" width="140" height="62">
+			</div>
+			<div class="info">
+				<span class="fecha">12 de diciembre del 2018</span>
+				<span class="valor">$200.000</span>
+				<span class="motivo">
+					<ul>
+						<li>Cuota 3 préstamo #0002</li>
+					</ul>
+				</span>
+				<span class="notas">Pagado en una sola transacción</span>
+			</div> <!-- .info -->
+		</div> <!-- registro-entrada -->
+	</div> <!--tabla-registros-->
+		
+	</section> <!--#lista-registros-pago-->
+	<script>
+		const $botonMenu = document.getElementById("bot-desplegar")
+		const $menu = document.getElementsByTagName('nav')[0]
+
+		$botonMenu.addEventListener('click', ()=>{
+			$menu.classList.toggle("oculto")
+		})
+	</script>
+</body>
+</html>
