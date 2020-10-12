@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:;base64,=">
+    <title>Crear usuarios</title>
+</head>
+
+<body>
+    <form id="formulario">
+        <p>
+            <label for="nombre_usuario">Nombre de usuario</label>
+            <input type="text" name="nombre_usuario" />
+        </p>
+        <p>
+            <label for="contrasenia">Contraseña</label>
+            <input type="password" name="contrasenia" />
+        </p>
+        <p>
+            <input type="submit" value="inscribir" />
+        </p>
+    </form>
+    <div id="pantalla"></div>
+    <script type="text/javascript">
+        const formulario = document.getElementById('formulario')
+        formulario.addEventListener('submit', manejadorFormulario)
+
+        async function manejadorFormulario(evento) {
+            event.preventDefault()
+            const datos = {
+                nombre: formulario.elements['nombre_usuario'].value,
+                contrasenia: formulario.elements['contrasenia'].value
+            }
+            let mensaje_resultado = ''
+            try {
+                const datosRespuesta = await postDatosComoJson('/api/inscribir', datos)
+                mensaje_resultado = 'Agregado'
+                Array.from(formulario.getElementsByTagName('input')).map(campo => campo.disabled = true)
+            } catch (error) {
+                console.log(error)
+                mensaje_resultado = 'Hubo un error. Por favor intente nuevamente mas tarde.'
+            }
+            document.getElementById('pantalla').innerText = mensaje_resultado
+        }
+
+        function postDatosComoJson(url, datos) {
+            const respuesta = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(datos)
+            })
+
+            if (!respuesta.ok) {
+                const mensaje = await respuesta.text()
+                throw new Error(mensaje)
+            }
+
+            return respuesta.json()
+        }
+
+    </script>
+</body>
+
+</html>

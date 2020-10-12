@@ -1,0 +1,3 @@
+//tutorial
+- para instalar react app se usa este codigo
+npx create-react-app [nombre de la app]

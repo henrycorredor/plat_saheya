@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:;base64,=">
+    <title>Autenticándose - Espere por favor</title>
+</head>
+
+<body>
+    <script>
+        const urlParametros = new URLSearchParams(window.location.search)
+        const redireccion = (!urlParametros.get('redir')) ? "" : urlParametros.get('redir')
+        fetch('/api/autenticarse', { method: 'POST', credentials: 'include', body: { redir: redireccion} })
+            .then(res => {if(res.ok){ window.location.href = `/${redireccion}`}})
+    </script>
+</body>
+
+</html>
