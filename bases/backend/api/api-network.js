@@ -2,20 +2,20 @@ const express = require('express')
 const controlador = require('./api-controlador')
 const seg = require('../seguridad/seg-controlador')
 const respuestas = require('../respuestas')
+const { sign } = require('jsonwebtoken')
 
 const enrutador = express.Router()
 
-enrutador.post('/validarFicha', validarFicha)
 enrutador.post('/identificarse', seg.caso('identificarse'), claveValida)
-enrutador.get('/listar', seg.caso('pasar'), listar)
-enrutador.post('/inscribir', seg.caso('pasar'), inscribir)
+enrutador.get('/listar', seg.caso('validarFicha'), listar)
+enrutador.post('/inscribir', seg.caso('validarFicha'), inscribir)
 
 function listar(peticion, respuesta) {
     controlador.listar()
         .then(datos => {
             respuestas.exito(peticion, respuesta, datos)
         })
-        .catch(err => {})
+        .catch(err => { })
 }
 
 function inscribir(peticion, respuesta) {
@@ -25,13 +25,8 @@ function inscribir(peticion, respuesta) {
 }
 
 function claveValida(peticion, respuesta) {
-    const ficha = seg.generarFicha
-    console.log('preparado para entregar ficha')
-    respuestas.entregarFicha(peticion,respuesta,ficha)
-}
-
-function validarFicha(pet,res){
-    res.send()
+    console.log('preparado para generar ficha')
+    seg.generarFicha(peticion, respuesta)
 }
 
 module.exports = enrutador

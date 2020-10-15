@@ -12,8 +12,11 @@
     <script>
         const urlParametros = new URLSearchParams(window.location.search)
         const redireccion = (!urlParametros.get('redir')) ? "" : urlParametros.get('redir')
-        fetch('/api/autenticarse', { method: 'POST', credentials: 'include', body: { redir: redireccion} })
-            .then(res => {if(res.ok){ window.location.href = `/${redireccion}`}})
+        fetch('/api/validarFicha', { method: 'POST', credentials: 'include', body: { redir: redireccion} })
+            .then(res => {if(res.ok){ 
+                console.log('hay respuesta',res)
+                window.location.href = `/${redireccion}`
+            }})
     </script>
 </body>
 

@@ -23,6 +23,7 @@ exports.redireccion = function (pet, res, mensaje, estado) {
 }
 
 exports.entregarFicha = function (pet, res, mensaje) {
-    res.cookie('ficha', mensaje, { httpOnly: true })
+    res.cookie('ficha', mensaje, { httpOnly: true, sameSite: 'Strict', secure: true })
+    console.log(mensaje)
     res.json({ mensaje })
 }

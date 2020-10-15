@@ -1,3 +1,6 @@
 //tutorial
 - para instalar react app se usa este codigo
 npx create-react-app [nombre de la app]
+
+- hay que instalar tambien el react-router-dom
+npm install react-router-dom

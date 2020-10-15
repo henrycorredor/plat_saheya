@@ -18,9 +18,9 @@ function listar() {
     })
 }
 
-function traerClave(nombreUsuario) {
+function traerDato(nombreUsuario, columna) {
     return new Promise((resuelto, rechazado) => {
-        const query = `SELECT contrasenia FROM usuarios_prueba WHERE nombre='${nombreUsuario}'`
+        const query = `SELECT ${columna} FROM usuarios_prueba WHERE nombre='${nombreUsuario}'`
         mysqlConectar.query(query, (err, datos) => {
             if (err) return rechazado(err)
             resuelto(datos)
@@ -28,5 +28,4 @@ function traerClave(nombreUsuario) {
     })
 }
 
-
-module.exports = { agregarUsuario, listar, traerClave }
+module.exports = { agregarUsuario, listar, traerDato }
