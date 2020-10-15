@@ -30,25 +30,22 @@ function generarFicha(pet, res) {
         .then(dato => {
             const carga = { id: dato[0].id }
             const ficha = jsonwebtoken.sign(carga, secretojwt)
-            respuestas.entregarFicha(pet, res, ficha)
+            respuestas.entregarFicha(res, ficha)
         })
         .catch(err => {
-            respuestas.error(pet, res, 'Error en el servidor: ' + err, 503)
+            respuestas.error(res, 'Error en el servidor: ' + err, 503)
         })
 }
 
 function validarFicha(pet) {
     const cabecera = pet.headers.cookie || '';
     if (!cabecera) {
-        console.log('no hay ficha')
         throw new Error('No pasa, no hay cabeceras')
     }
     if (cabecera.indexOf('ficha=') === -1) {
-        console.log('invalido')
         throw new Error('Formato inválido')
     }
     const ficha = cabecera.replace('ficha=', '')
-    console.log('la ficha pasó: ' + ficha)
     return jsonwebtoken.verify(ficha, secretojwt)
 }
 
@@ -56,18 +53,16 @@ function compararClave(pet, res, siguiente) {
     baseDatos.traerDato(pet.body.nombre, 'contrasenia')
         .then(dato => {
             if (dato[0] === undefined) {
-                console.log('usuario inexistente')
-                respuestas.error(pet, res, 'Usuario Inexistente', 401)
+                respuestas.error(res, 'Usuario Inexistente', 401)
             } else {
                 if (dato[0].contrasenia === pet.body.contrasenia) {
                     siguiente()
                 } else {
-                    console.log('contraseña incorrecta - controlador')
-                    respuestas.error(pet, res, 'Contraseñia incorrecta', 401)
+                    respuestas.error(res, 'Contraseña incorrecta', 401)
                 }
             }
         }).catch(err => {
-            respuestas.error(pet, res, 'Error en el servidor, por favor reportele a Alejo Corredor', 503)
+            respuestas.error(res, 'Error en el servidor, por favor reportele a Alejo Corredor', 503)
         })
 }
 

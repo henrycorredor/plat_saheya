@@ -1,29 +1,29 @@
-exports.exito = function (pet, res, mensaje, estado) {
+exports.exito = function (res, mensaje, estado) {
     let codigoEstado = estado || 200
-    let mensajeEstado = mensaje || ''
-    res.status(codigoEstado).send(mensajeEstado)
-}
-
-exports.error = function (pet, res, mensaje, estado) {
-    let estadoCodigo = estado || 500
-    let estadoMensaje = mensaje || 'Error interno, contacte al administrador (o sea a Alejo Corredor)'
-    res.status(estadoCodigo).send({
+    let mensajeRes = mensaje || ''
+    console.log('se manda el mensaje: ',mensajeRes)
+    //res.send(mensajeRes)
+    res.send({
+        body : mensajeRes,
         error: false,
-        status: estadoCodigo,
-        body: estadoMensaje
+        status: codigoEstado
     })
 }
 
-exports.redireccion = function (pet, res, mensaje, estado) {
-    //res.redirect('/')
-    res.send('no papen')
-    // const error = new Error('No puedes hacer esto');
-    // error.statusCode = 401
-    // throw error
+exports.error = function (res, mensaje, estado) {
+    let estadoCodigo = estado || 500
+    let estadoMensaje = mensaje || 'Error interno, contacte al administrador (o sea a Alejo Corredor)'
+    res.status(estadoCodigo).send({
+        body : estadoMensaje,
+        error: true,
+        status: estadoCodigo
+    })
 }
 
-exports.entregarFicha = function (pet, res, mensaje) {
+exports.entregarFicha = function (res, mensaje) {
     res.cookie('ficha', mensaje, { httpOnly: true, sameSite: 'Strict', secure: true })
-    console.log(mensaje)
-    res.json({ mensaje })
+    res.json({
+        body:'ficha entregada',
+        error:false
+    })
 }

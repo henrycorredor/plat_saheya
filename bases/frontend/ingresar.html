@@ -41,15 +41,18 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(datos)
-            }).then(res => {
-                if (res.ok) {
+            }).then(async res => {
+               if (res.ok) {
                     notificador.innerText = "Un momento por favor..."
+                    console.log('redireccionando...')
                     location.href = '/lista'
-                }
-                console.log(res)
+               }else{
+                   const elDato = await res.json()
+                   notificador.innerText = elDato.body
+               }
             }).catch(err => {
-                notificador.innerText = "Hubo un error. Inténtelo más tarde"
-            })
+                    notificador.innerText = "Hubo un error. Inténtelo más tarde"
+                })
         }
     </script>
 </body>

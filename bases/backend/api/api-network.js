@@ -10,23 +10,22 @@ enrutador.post('/identificarse', seg.caso('identificarse'), claveValida)
 enrutador.get('/listar', seg.caso('validarFicha'), listar)
 enrutador.post('/inscribir', seg.caso('validarFicha'), inscribir)
 
-function listar(peticion, respuesta) {
+function listar(pet, respuesta) {
     controlador.listar()
         .then(datos => {
-            respuestas.exito(peticion, respuesta, datos)
+            respuestas.exito(respuesta, datos)
         })
         .catch(err => { })
 }
 
-function inscribir(peticion, respuesta) {
-    controlador.inscribir(peticion)
+function inscribir(pet, respuesta) {
+    controlador.inscribir(pet)
         .then(datos => respuestas.exito(peticion, respuesta, datos))
         .catch(err => console.log(err))
 }
 
-function claveValida(peticion, respuesta) {
-    console.log('preparado para generar ficha')
-    seg.generarFicha(peticion, respuesta)
+function claveValida(pet, respuesta) {
+    seg.generarFicha(pet, respuesta)
 }
 
 module.exports = enrutador

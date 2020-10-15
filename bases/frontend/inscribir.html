@@ -45,7 +45,7 @@
             document.getElementById('pantalla').innerText = mensaje_resultado
         }
 
-        function postDatosComoJson(url, datos) {
+        async function postDatosComoJson(url, datos) {
             const respuesta = await fetch(url, {
                 method: 'POST',
                 headers: {

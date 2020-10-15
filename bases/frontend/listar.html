@@ -15,9 +15,11 @@
     <script>
         const contenedor = document.getElementById('contenedor')
         fetch('/api/listar')
-            .then(res => res.json())
-            .then(datos => {
-                renderizar(datos)
+            .then(async res => {
+               if (res.ok) {
+                   const elDato = await res.json()
+                   renderizar(elDato.body)
+               }    
             })
             .catch(err => {
                 contenedor.innerText = `Problema: ${err}`

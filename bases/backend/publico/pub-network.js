@@ -6,22 +6,17 @@ const plantillas = require('../../frontend/frontend-control')
 enrutador.get('/', portada)
 enrutador.get('/lista', seg.caso('pasar'), lista)
 enrutador.get('/inscribir', seg.caso('nopasar'), inscribir)
-enrutador.get('/autenticarse', autenticarse)
 
-function portada(peticion, respuesta) {
+function portada(pet, respuesta) {
     plantillas(respuesta, 'ingresar.html')
 }
 
-function lista(peticion, respuesta) {
+function lista(pet, respuesta) {
     plantillas(respuesta, 'listar.html')
 }
 
 function inscribir(pet, res) {
     plantillas(res, 'inscribir.html')
-}
-
-function autenticarse(pet, res) {
-    plantillas(res, 'autenticarse.html')
 }
 
 module.exports = enrutador
