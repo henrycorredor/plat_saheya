@@ -1,15 +1,16 @@
+const bcrypt = require('bcrypt')
 const baseDatos = require('../../baseDatos/bd-controlador')
 
-function inscribir(pet) {
+async function inscribir(pet) {
     datos = {
         nombre: pet.body.nombre,
-        contrasenia: pet.body.contrasenia
+        contrasenia: await bcrypt.hash(pet.body.contrasenia, 5)
     }
     return baseDatos.agregarUsuario(datos)
 }
 
-function listar(){
+function listar() {
     return baseDatos.listar()
 }
 
-module.exports = { inscribir , listar }
+module.exports = { inscribir, listar }

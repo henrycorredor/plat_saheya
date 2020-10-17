@@ -1,8 +1,7 @@
 const express = require('express')
 const controlador = require('./api-controlador')
 const seg = require('../seguridad/seg-controlador')
-const respuestas = require('../respuestas')
-const { sign } = require('jsonwebtoken')
+const respuestas = require('../utiles/respuestas')
 
 const enrutador = express.Router()
 

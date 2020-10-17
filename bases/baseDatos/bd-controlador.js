@@ -23,7 +23,7 @@ function traerDato(nombreUsuario, columna) {
         const query = `SELECT ${columna} FROM usuarios_prueba WHERE nombre='${nombreUsuario}'`
         mysqlConectar.query(query, (err, datos) => {
             if (err) return rechazado(err)
-            resuelto(JSON.stringify(datos))
+            resuelto(datos)
         })
     })
 }

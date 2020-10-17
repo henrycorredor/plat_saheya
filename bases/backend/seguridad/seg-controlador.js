@@ -1,7 +1,9 @@
+const bcrypt = require('bcrypt')
 const baseDatos = require('../../baseDatos/bd-controlador')
 const config = require('../config_serv')
-const respuestas = require('../respuestas')
+const respuestas = require('../utiles/respuestas')
 const jsonwebtoken = require('jsonwebtoken')
+const error = require('../utiles/errores')
 
 const secretojwt = config.jwt_secreto
 
@@ -10,12 +12,10 @@ function caso(caso) {
     function mediador(pet, res, siguiente) {
         switch (caso) {
             case 'identificarse':
-                console.log('preparandose para comparar clave')
                 compararClave(pet, res, siguiente)
                 break
             case 'validarFicha':
-                console.log('preparandose para validar ficha')
-                if (validarFicha(pet)) { siguiente() } else { throw new Error('No autorizado') }
+                validarFicha(pet, siguiente)
                 break
             default:
                 siguiente()
@@ -37,32 +37,40 @@ function generarFicha(pet, res) {
         })
 }
 
-function validarFicha(pet) {
-    const cabecera = pet.headers.cookie || '';
-    if (!cabecera) {
-        throw new Error('No pasa, no hay cabeceras')
+function validarFicha(pet, siguiente) {
+    try {
+        const cabecera = pet.headers.cookie || '';
+        if (!cabecera || cabecera.indexOf('ficha=') === -1) {
+            throw error('Por favor identifíquese.', 401)
+        }
+        const ficha = cabecera.replace('ficha=', '')
+        if (jsonwebtoken.verify(ficha, secretojwt)) {
+            siguiente()
+        } else {
+            throw error(res, 'Por favor identifíquese.' + err, 401)
+        }
+    } catch (err) {
+        siguiente(err)
     }
-    if (cabecera.indexOf('ficha=') === -1) {
-        throw new Error('Formato inválido')
-    }
-    const ficha = cabecera.replace('ficha=', '')
-    return jsonwebtoken.verify(ficha, secretojwt)
 }
 
 function compararClave(pet, res, siguiente) {
     baseDatos.traerDato(pet.body.nombre, 'contrasenia')
         .then(dato => {
             if (dato[0] === undefined) {
-                respuestas.error(res, 'Usuario Inexistente', 401)
+                respuestas.error(res, 'Por favor verifique su nombre de usuario y vuelva a intentarlo', 401)
             } else {
-                if (dato[0].contrasenia === pet.body.contrasenia) {
-                    siguiente()
-                } else {
-                    respuestas.error(res, 'Contraseña incorrecta', 401)
-                }
+                bcrypt.compare(pet.body.contrasenia, dato[0].contrasenia)
+                    .then(validado => {
+                        if (validado) {
+                            siguiente()
+                        } else {
+                            respuestas.error(res, 'Contraseña incorrecta', 401)
+                        }
+                    })
             }
         }).catch(err => {
-            respuestas.error(res, 'Error en el servidor, por favor reportele a Alejo Corredor', 503)
+            throw error(`Error en el servidor, por favor reportele a Alejo Corredor lo siguiente: ${err}`, 503)
         })
 }
 

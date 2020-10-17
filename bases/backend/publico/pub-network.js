@@ -4,8 +4,8 @@ const seg = require('../seguridad/seg-controlador')
 const plantillas = require('../../frontend/frontend-control')
 
 enrutador.get('/', portada)
-enrutador.get('/lista', seg.caso('pasar'), lista)
-enrutador.get('/inscribir', seg.caso('nopasar'), inscribir)
+enrutador.get('/lista', seg.caso('validarFicha'), lista)
+enrutador.get('/inscribir', seg.caso('validarFicha'), inscribir)
 
 function portada(pet, respuesta) {
     plantillas(respuesta, 'ingresar.html')
