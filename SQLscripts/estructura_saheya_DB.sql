@@ -38,12 +38,14 @@ CREATE TABLE `transacciones`(
 `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `monto` int(10) NOT NULL,
 `motivo` tinyint(1) NOT NULL,
+`comentario` varchar(150) DEFAULT NULL,
 PRIMARY KEY (`transaccion_id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 /* MOTIVO
 1 aporte a capital
 2 abono a deuda
-3 intereses */
+3 intereses
+4 desembolso prestamo */
 
 CREATE TABLE `prestamos`(
 `prestamo_id` int(5) unsigned NOT NULL AUTO_INCREMENT,
@@ -65,3 +67,55 @@ CREATE TABLE `relaciones_coodeudores`(
 `id_codeudor` int(5) unsigned NOT NULL,
 `monto_avalado` int(10) NOT NULL,
 PRIMARY KEY (`id_relacion`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*
+cuota_num = 0 es el desembolso
+*/
+CREATE TABLE `transacciones_prestamos`(
+`id_transaccion` int unsigned NOT NULL AUTO_INCREMENT,
+`monto_total` int unsigned NOT NULL,
+`prestamo_id` int unsigned NOT NULL,
+`cuota_numero` tinyint(3) NOT NULL DEFAULT '0',
+`cuotas_restantes`  tinyint(3) NOT NULL,
+`interes` int unsigned NOT NULL,
+`abono` int unsigned NOT NULL,
+`por_pagar` int unsigned NOT NULL,
+PRIMARY KEY (`id_transaccion`)) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+
+/* MOTIVO
+1 aporte a capital
+2 abono a deuda
+3 intereses
+*/
+
+INSERT INTO transacciones(usuario_id,fecha_realizacion,monto,motivo,comentario)
+VALUES 
+(35,'2018-08-15', 35000,1,null),
+(35,'2018-08-20', 200000, 2, null),
+(35, '2018-08-20', 35000, 1, null),
+(35, '2018-09-07', 200000, 2, null),
+(35, '2018-09-07', 35000, 1, null),
+(35,'2018-10-13', 200000,2, null),
+(35, '2018-10-13',35000,1,'Entregado en efectivo a la monita'),
+(35, '2018-11-25', 35000, 1, 'el patroncito estaba chinchoso lol');
+
+/* ESTADO
+1 pagando
+2 finalizado */
+
+INSERT INTO relaciones_coodeudores(id_prestamo,id_codeudor,monto_avalado)
+VALUES (1,34,800000);
+
+INSERT INTO prestamos(num_cuotas, cuotas_pagadas, deudor_id, relacion_coodeudor, estado)
+VALUES
+(12,6,35,1,1);
+
+INSERT INTO transacciones_prestamos(monto_total,prestamo_id,cuota_numero,cuotas_restantes,interes,abono,por_pagar)
+VALUES
+(0,1,0,12,0,0,2800000),
+(207000,1,1,11,7000,200000,2600000),
+(206500,1,2,10,6500,200000,2800000),
+(204800,1,3,9,4800,200000,2800000),
+(204000,1,4,8,4000,200000,2800000),
+(203800,1,5,7,3800,200000,2800000),
+(203600,1,6,6,3600,200000,2800000);
