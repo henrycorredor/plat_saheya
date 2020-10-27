@@ -1,8 +1,10 @@
+const { query } = require('express')
 const mysqlConectar = require('./conectar')
 
 function agregarUsuario(datos) {
     return new Promise((resuelto, rechazado) => {
-        mysqlConectar.query(`INSERT INTO usuarios_prueba SET ?`, datos, (err, resultado) => {
+        const query = `INSERT INTO `
+        mysqlConectar.query(`INSERT INTO contasenias SET ?`, datos, (err, resultado) => {
             if (err) return rechazado(err)
             resuelto(resultado)
         })
@@ -11,16 +13,18 @@ function agregarUsuario(datos) {
 
 function listar() {
     return new Promise((resuelto, rechazado) => {
-        mysqlConectar.query(`SELECT * FROM usuarios_prueba`, (err, resultado) => {
+        mysqlConectar.query(`SELECT * FROM contrasenias`, (err, resultado) => {
             if (err) return rechazado(err)
             resuelto(resultado)
         })
     })
 }
 
-function traerDato(nombreUsuario, columna) {
+function retornarContrasenia(numIdentificacion){
     return new Promise((resuelto, rechazado) => {
-        const query = `SELECT ${columna} FROM usuarios_prueba WHERE nombre='${nombreUsuario}'`
+        const query = `SELECT contrasenia
+        FROM contrasenias C, usuarios U
+        WHERE U.num_identificacion = '${numIdentificacion}' AND U.usuario_id = C.id`
         mysqlConectar.query(query, (err, datos) => {
             if (err) return rechazado(err)
             resuelto(datos)
@@ -28,4 +32,15 @@ function traerDato(nombreUsuario, columna) {
     })
 }
 
-module.exports = { agregarUsuario, listar, traerDato }
+function traerDato(tabla,columna,condicion){
+    return new Promise((resuelto, rechazado) => {
+        const query = `SELECT ${columna} FROM ${tabla} WHERE ${condicion}`
+        console.log(query)
+        mysqlConectar.query(query, (err, resultado) => {
+            if (err) return rechazado(err)
+            resuelto(resultado)
+        })
+    })
+}
+
+module.exports = { agregarUsuario, listar, retornarContrasenia, traerDato }

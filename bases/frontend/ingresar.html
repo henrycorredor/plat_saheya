@@ -11,8 +11,8 @@
 <body>
     <p>Ingresar</p>
     <form id="formulario">
-        <label for="nombre">Nombre:</label>
-        <input name="nombre" type="text" /><br />
+        <label for="nombre">Número de identificación:</label>
+        <input name="numIdentificacion" type="text" /><br />
         <label for="contrasenia">Contraseña: </label>
         <input name='contrasenia' type="password" /><br />
         <input type="submit" value="entrar" />
@@ -29,7 +29,7 @@
             notificador.innerText = "Un momento por favor ..."
             //------------
             const datos = {
-                nombre: formulario.elements['nombre'].value,
+                numIdentificacion: formulario.elements['numIdentificacion'].value,
                 contrasenia: formulario.elements['contrasenia'].value
             }
             //------------

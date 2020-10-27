@@ -3,7 +3,9 @@ const baseDatos = require('../../baseDatos/bd-controlador')
 
 async function inscribir(pet) {
     datos = {
-        nombre: pet.body.nombre,
+        nombres: pet.body.nombres,
+        apellidos: pet.body.nombres,
+        num_identificacion: pet.body.num_identificacion,
         contrasenia: await bcrypt.hash(pet.body.contrasenia, 5)
     }
     return baseDatos.agregarUsuario(datos)
