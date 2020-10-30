@@ -45,7 +45,7 @@
                if (res.ok) {
                     notificador.innerText = "Un momento por favor..."
                     console.log('redireccionando...')
-                    location.href = '/lista'
+                    //location.href = '/lista'
                }else{
                    const elDato = await res.json()
                    notificador.innerText = elDato.body

@@ -1,11 +1,11 @@
-const bcrypt = require("bcrypt");
-const baseDatos = require("../../baseDatos/bd-controlador");
-const config = require("../config_serv");
-const respuestas = require("../utiles/respuestas");
-const jsonwebtoken = require("jsonwebtoken");
-const error = require("../utiles/errores");
+const bcrypt = require("bcrypt")
+const baseDatos = require("../../baseDatos/bd-controlador")
+const config = require("../config_serv")
+const respuestas = require("../utiles/respuestas")
+const jsonwebtoken = require("jsonwebtoken")
+const error = require("../utiles/errores")
 
-const secretojwt = config.jwt_secreto;
+const secretojwt = config.jwt_secreto
 
 function caso(caso) {
   function mediador(pet, res, siguiente) {
@@ -25,7 +25,7 @@ function caso(caso) {
 }
 
 function generarFicha(pet, res) {
-  baseDatos.traerDato("usuarios","usuario_id",`num_identificacion = '${pet.body.numIdentificacion}'`)
+  baseDatos.traerDato("usuarios", "usuario_id", `num_identificacion = '${pet.body.numIdentificacion}'`)
     .then((dato) => {
       const carga = { id: dato[0].id };
       const ficha = jsonwebtoken.sign(carga, secretojwt);
@@ -64,16 +64,14 @@ function compararClave(pet, res, siguiente) {
           401
         );
       } else {
-        siguiente();
-        /*bcrypt.compare(pet.body.contrasenia, dato[0].contrasenia)
-                    .then(validado => {
-                        if (validado) {
-                            siguiente()
-                        } else {
-                            console.log('llego ',pet.body.contrasenia,'compara ',dato[0].contrasenia)
-                            respuestas.error(res, 'Contraseña incorrecta', 401)
-                        }
-                    })*/
+        bcrypt.compare(pet.body.contrasenia, dato[0].contrasenia)
+          .then(validado => {
+            if (validado) {
+              siguiente()
+            } else {
+              respuestas.error(res, 'Contraseña incorrecta', 401)
+            }
+          })
       }
     })
     .catch((err) => {

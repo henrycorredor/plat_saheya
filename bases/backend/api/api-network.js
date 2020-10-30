@@ -19,8 +19,15 @@ function listar(pet, respuesta) {
 
 function inscribir(pet, respuesta) {
     controlador.inscribir(pet)
-        .then(datos => respuestas.exito(peticion, respuesta, datos))
-        .catch(err => console.log(err))
+        .then(datos => respuestas.exito(respuesta, datos))
+        .catch(err => {
+            console.log('el error ',err)
+            if (err = 'Usuario existente'){
+                respuestas.error(respuesta, 'El usuario ya existe, verifique e intentelo de nuevo')
+            }else{
+                respuestas.error(respuesta, err)
+            }
+        })
 }
 
 function claveValida(pet, respuesta) {

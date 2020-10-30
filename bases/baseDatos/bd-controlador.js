@@ -1,13 +1,27 @@
-const { query } = require('express')
 const mysqlConectar = require('./conectar')
 
 function agregarUsuario(datos) {
     return new Promise((resuelto, rechazado) => {
-        const query = `INSERT INTO `
-        mysqlConectar.query(`INSERT INTO contasenias SET ?`, datos, (err, resultado) => {
-            if (err) return rechazado(err)
-            resuelto(resultado)
-        })
+        traerDato('usuarios', 'num_identificacion', `num_identificacion = ${datos.num_identificacion}`)
+            .then(usuario => {
+                if (usuario[0] === undefined) {
+                    const query = `INSERT INTO usuarios(nombres, apellidos, num_identificacion) VALUES ('${datos.nombres}', '${datos.apellidos}', '${datos.num_identificacion}');`
+                    mysqlConectar.query(query, (err, recienRegistrado) => {
+                        if (err) {
+                            return rechazado(err)
+                        }
+                        mysqlConectar.query('INSERT INTO contrasenias SET ?', { id: recienRegistrado.insertId, contrasenia: datos.contrasenia }, (err, resultado) => {
+                            if (err) {
+                                return rechazado(err)
+                            }
+                            resuelto(resultado)
+                        })
+                    })
+                } else {
+                    rechazado('Usuario existente')
+                }
+            })
+            .catch(err=> rechazado(err) )
     })
 }
 
@@ -20,7 +34,7 @@ function listar() {
     })
 }
 
-function retornarContrasenia(numIdentificacion){
+function retornarContrasenia(numIdentificacion) {
     return new Promise((resuelto, rechazado) => {
         const query = `SELECT contrasenia
         FROM contrasenias C, usuarios U
@@ -32,10 +46,9 @@ function retornarContrasenia(numIdentificacion){
     })
 }
 
-function traerDato(tabla,columna,condicion){
+function traerDato(tabla, columna, condicion) {
     return new Promise((resuelto, rechazado) => {
         const query = `SELECT ${columna} FROM ${tabla} WHERE ${condicion}`
-        console.log(query)
         mysqlConectar.query(query, (err, resultado) => {
             if (err) return rechazado(err)
             resuelto(resultado)
