@@ -8,9 +8,11 @@ const enrutador = express.Router()
 enrutador.post('/identificarse', seg.caso('identificarse'), claveValida)
 enrutador.get('/listar', seg.caso('validarFicha'), listar)
 enrutador.post('/inscribir', seg.caso('validarFicha'), inscribir)
+enrutador.post('/registrar_movimiento', seg.caso('validarFicha'), reg_movimiento)
+
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
-    res.send(pet.body)
+    res.json(pet.body)
 })
 
 function listar(pet, respuesta) {
@@ -25,7 +27,6 @@ function inscribir(pet, respuesta) {
     controlador.inscribir(pet)
         .then(datos => respuestas.exito(respuesta, datos))
         .catch(err => {
-            console.log('el error ', err)
             if (err = 'Usuario existente') {
                 respuestas.error(respuesta, 'El usuario ya existe, verifique e intentelo de nuevo')
             } else {
@@ -36,6 +37,12 @@ function inscribir(pet, respuesta) {
 
 function claveValida(pet, respuesta) {
     seg.generarFicha(pet, respuesta)
+}
+
+function reg_movimiento(pet, res) {
+    controlador.registrarMovimiento(pet)
+        .then(mensaje => respuestas.exito(res, `Registrado ${mensaje}`))
+        .catch(error => respuestas.error(res, error))
 }
 
 module.exports = enrutador

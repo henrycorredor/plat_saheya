@@ -21,7 +21,7 @@ function agregarUsuario(datos) {
                     rechazado('Usuario existente')
                 }
             })
-            .catch(err=> rechazado(err) )
+            .catch(err => rechazado(err))
     })
 }
 
@@ -56,4 +56,19 @@ function traerDato(tabla, columna, condicion) {
     })
 }
 
-module.exports = { agregarUsuario, listar, retornarContrasenia, traerDato }
+function registrarMovimiento(datos) {
+    return new Promise((res, rec) => {
+        const tabla = (datos.motivo === '1') ? 'transacciones' : 'transacciones_prestamos'
+
+
+        //const query = `INSERT INTO usuarios(nombres, apellidos, num_identificacion) VALUES ('${datos.nombres}', '${datos.apellidos}', '${datos.num_identificacion}');`
+
+        mysqlConectar.query(`INSERT INTO ${tabla} VALUES (?);`, datos, (error, resultado) => {
+            console.log('error', error, 'resultado', resultado)
+            if (error) return rec(error)
+            res(resultado)
+        })
+    })
+}
+
+module.exports = { agregarUsuario, listar, retornarContrasenia, traerDato, registrarMovimiento }

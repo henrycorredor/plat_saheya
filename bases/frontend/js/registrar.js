@@ -50,16 +50,29 @@ const formulario = document.getElementsByTagName('form')[0]
 
 formulario.addEventListener('submit', evento => {
     evento.preventDefault()
-
-    Array.from(evento.target.getElementsByTagName('input')).forEach(elInput =>{
-        console.log(elInput)
+    let datos = {}
+    Array.from(evento.target.getElementsByTagName('input')).forEach(elInput => {
+        if ((!elInput.checked && elInput.type === 'radio') || elInput.name === '') {
+            console.log(elInput, 'no pasa')
+            return
+        } else {
+            console.log(elInput, 'pasa')
+            datos[elInput.name] = elInput.value
+        }
     })
+    console.log(datos)
 
-    fetch('api/experimentos', {
+    fetch('api/registrar_movimiento', {
         method: 'POST',
-        body: new FormData(evento.target)
-    }).then(function (response) {
-        console.log(response)
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(datos)
+    }).then(async function (response) {
+        if (response.ok) {
+            const elDato = await response.json()
+            console.log('respuesta ', elDato)
+        }
     }).catch(function (error) {
         console.warn(error);
     });

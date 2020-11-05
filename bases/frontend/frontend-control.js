@@ -6,16 +6,8 @@ function plano(respuesta, plantilla) {
     respuesta.sendFile(__dirname + '/' + plantilla)
 }
 
-const opciones = {
-    usuarioId: 1,
-    nombre: 'Henry',
-    rol: '1'
-}
-
 async function pugTemplate(peticion, respuesta, plantilla) {
-    const ficha = decodFicha(peticion)
-    const infoUsuario = await traerDato('usuarios', 'nombres, apellidos, rol, usuario_id, capital', `usuario_id = ${ficha.id}`)
-    console.log('consulta: ', infoUsuario)
+    const infoUsuario = await decodFicha.usuarioInfo(peticion)
     respuesta.render(__dirname + '/' + plantilla, infoUsuario[0])
 }
 
