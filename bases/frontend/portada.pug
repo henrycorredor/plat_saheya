@@ -1,0 +1,24 @@
+head
+    h1 Este es el título
+    menu
+        ul
+            li
+                a(href='/portada') Portada
+            li
+                a(href='/lista') Lista
+            li
+                a(href='registrar-movimiento') Registrar movimientos
+            li
+                a(href='/inscribir') Inscribir
+    #info_usuario.tarjeta_resumen
+        h2 Buenos días #{nombres} #{apellidos} 
+        p Rol: #{rol}, ID: #{usuario_id}
+    #resumen_prestamo.tarjeta_resumen
+        h2 Cuota mínima de este mes:
+        span (por fijar)
+    #tarjeta_resumen
+        .barra_resumen Capital libre: #{capital}
+        .barra_resumen En deuda:
+
+section
+    #transacciones.section_tarjeta ... cargando ...

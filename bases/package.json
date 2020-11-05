@@ -15,6 +15,7 @@
     "express-jwt": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
-    "nodemon": "^2.0.5"
+    "nodemon": "^2.0.5",
+    "pug": "^3.0.0"
   }
 }

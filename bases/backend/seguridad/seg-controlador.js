@@ -12,13 +12,13 @@ function caso(caso) {
     switch (caso) {
       case "identificarse":
         compararClave(pet, res, siguiente);
-        break;
+        break
       case "validarFicha":
         validarFicha(pet, siguiente);
-        break;
+        break
       default:
-        siguiente();
-        break;
+        siguiente()
+        break
     }
   }
   return mediador;
@@ -27,7 +27,7 @@ function caso(caso) {
 function generarFicha(pet, res) {
   baseDatos.traerDato("usuarios", "usuario_id", `num_identificacion = '${pet.body.numIdentificacion}'`)
     .then((dato) => {
-      const carga = { id: dato[0].id };
+      const carga = { id: dato[0].usuario_id };
       const ficha = jsonwebtoken.sign(carga, secretojwt);
       respuestas.entregarFicha(res, ficha);
     })
@@ -38,18 +38,18 @@ function generarFicha(pet, res) {
 
 function validarFicha(pet, siguiente) {
   try {
-    const cabecera = pet.headers.cookie || "";
+    const cabecera = pet.headers.cookie || ""
     if (!cabecera || cabecera.indexOf("ficha=") === -1) {
-      throw error("Por favor identifíquese.", 401);
+      throw error("Por favor identifíquese.", 401)
     }
-    const ficha = cabecera.replace("ficha=", "");
+    const ficha = cabecera.replace("ficha=", "")
     if (jsonwebtoken.verify(ficha, secretojwt)) {
-      siguiente();
+      siguiente()
     } else {
       throw error(res, "Por favor identifíquese." + err, 401);
     }
   } catch (err) {
-    siguiente(err);
+    siguiente(err)
   }
 }
 
@@ -62,7 +62,7 @@ function compararClave(pet, res, siguiente) {
           res,
           "Por favor verifique su nombre de usuario y vuelva a intentarlo",
           401
-        );
+        )
       } else {
         bcrypt.compare(pet.body.contrasenia, dato[0].contrasenia)
           .then(validado => {
@@ -78,8 +78,8 @@ function compararClave(pet, res, siguiente) {
       throw error(
         `Error en el servidor, por favor reportele a Alejo Corredor lo siguiente: ${err}`,
         503
-      );
-    });
+      )
+    })
 }
 
-module.exports = { caso, generarFicha, validarFicha };
+module.exports = { caso, generarFicha, validarFicha }

@@ -1,0 +1,14 @@
+include segmentos/header.pug
+section
+    form
+        #form_fijo
+            label(for='1') Abono a capital
+            input(type='radio' name='motivo' value='1' checked)
+            label(for='2') Abono a préstamo
+            input(type='radio' name='motivo' value='2')
+
+            input(type='submit')
+        #form_variable
+
+script
+    include js/registrar.js
