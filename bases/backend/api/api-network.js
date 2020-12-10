@@ -2,13 +2,17 @@ const express = require('express')
 const controlador = require('./api-controlador')
 const seg = require('../seguridad/seg-controlador')
 const respuestas = require('../utiles/respuestas')
+const lanzaError = require('../utiles/errores')
 
 const enrutador = express.Router()
 
 enrutador.post('/identificarse', seg.caso('identificarse'), claveValida)
 enrutador.get('/listar', seg.caso('validarFicha'), listar)
+enrutador.get('/verificar_coodeudor', seg.caso('validarFicha'), ver_coodeudor)
 enrutador.post('/inscribir', seg.caso('validarFicha'), inscribir)
 enrutador.post('/registrar_movimiento', seg.caso('validarFicha'), reg_movimiento)
+enrutador.post('/aplicar_prestamo', seg.caso('validarFicha'), aplicar_prestamo)
+enrutador.post('/apr_prestamo', seg.caso('validarFicha', 5), apr_prestamo)
 
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
@@ -20,7 +24,9 @@ function listar(pet, respuesta) {
         .then(datos => {
             respuestas.exito(respuesta, datos)
         })
-        .catch(err => { })
+        .catch(err => {
+            respuestas.error(res, err)
+        })
 }
 
 function inscribir(pet, respuesta) {
@@ -39,10 +45,40 @@ function claveValida(pet, respuesta) {
     seg.generarFicha(pet, respuesta)
 }
 
-function reg_movimiento(pet, res) {
-    controlador.registrarMovimiento(pet)
-        .then(mensaje => respuestas.exito(res, `Registrado ${mensaje}`))
-        .catch(error => respuestas.error(res, error))
+async function reg_movimiento(pet, res) {
+    try {
+        await controlador.registrarMovimiento(pet)
+        respuestas.exito(res, `registrado`)
+    } catch (error) {
+        respuestas.error(res, error)
+    }
+}
+
+async function aplicar_prestamo(pet, res) {
+    try {
+        await controlador.aplicarPrestamo(pet)
+        respuestas.exito(res, 'registrado')
+    } catch (error) {
+        respuestas.error(res, error)
+    }
+}
+
+async function ver_coodeudor(pet, res) {
+    try {
+        const respuesta = await controlador.ver_coodeudor(pet)
+        respuestas.exito(res, respuesta)
+    } catch (error) {
+        respuestas.error(res, error)
+    }
+}
+
+async function apr_prestamo(pet, res) {
+    try {
+        const respuesta = await controlador.aprov_prestamo(pet)
+        respuestas.exito(res, respuesta)
+    } catch (error) {
+        respuestas.error(res, error)
+    }
 }
 
 module.exports = enrutador

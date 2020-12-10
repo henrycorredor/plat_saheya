@@ -9,7 +9,7 @@ function decodificarFicha(cabecera) {
 
 async function usuarioInfo(cabecera) {
     const ficha = decodificarFicha(cabecera)
-    const datos = await traerDato('usuarios', 'nombres, apellidos, rol, usuario_id, capital', `usuario_id = ${ficha.id}`)
+    const datos = await traerDato('usuarios', 'nombres, apellidos, rol, usuario_id, capital, en_deuda', `usuario_id = ${ficha.id}`)
     return datos[0]
 }
 

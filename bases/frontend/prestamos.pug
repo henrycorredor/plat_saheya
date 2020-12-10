@@ -1,0 +1,103 @@
+include segmentos/header.pug
+if err
+    section#error
+        h2 Ha habido un error
+            p Por favor informe al administrador (o sea Alejo Corredor)
+            h3 El error:
+            p #{err}
+else
+    section#sec_formulario_solicitar
+        h2 Solicitar un préstamo
+        if usuario.en_deuda === '0'
+            p Su capital es de $#{usuario.capital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}, puede solicitar un prestamo sin fiador de hasta $#{(Math.floor(usuario.capital * (reglas.tope_capital_prestamo/100))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+        else if Math.floor((usuario.capital * (reglas.tope_capital_prestamo/100)-usuario.en_deuda)) > 0
+            p Su capital es de $#{usuario.capital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}, en deuda $#{usuario.en_deuda.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}. Puede solicitar un prestamo sin fiador de hasta $#{(Math.floor((usuario.capital * (reglas.tope_capital_prestamo/100)-usuario.en_deuda))).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+        else
+            p Su capital es de $#{usuario.capital.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}. Para solicitar préstamos, solicite soporte de un fiador.
+        form
+            #form_pasarela_1.cood_pasarela
+                p
+                    label(for='monto') Monto: 
+                    input(type='number' name='monto' id="monto")
+                p
+                    label(for='cuotas') Número de cuotas:
+                    input(type="number" name="cuotas" id='cuotas') 
+                p#p_input_coodeudor(style={display:'none'})
+                    a(href='javascript:agregaCoodeudor()' id="a_agregar_coodeudor") Agregar un coodeudor
+                    span#coodeudor_rotulo
+                p
+                    label(for='fecha_inicial') Fecha de desembolso: 
+                    input(type="date" name="fecha_inicial" id="fecha_inicial")
+            #form_pasarela_2.cood_pasarela(style={display:'none'})
+                a(href='javascript:pasarela_paso_1()')
+                p#coodeudor_1.coodeudor
+                    label(for='coodeudor_1') Cédula del coodeudor: 
+                    input(type='number' name='cood_cedula_1' id='cood_cedula_1')
+            p
+                #tabla_coodeudores(style={display:'none'})
+                input(type='submit' id="bot_solicitar" value="Solicitar")
+                input(type='submit' id='bot_previsualizar' value='Previsualizar cuotas')
+            span#form_aviso
+        span#tabla_prev
+    - var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    if prestamos.poraprobar.length !== 0
+        section#sec_prestamos_por_aprobar
+            h2 Préstamos por aprobar
+            table
+                thead
+                    tr
+                        th Monto
+                        th Fecha de la petición
+                tbody
+                    each val in prestamos.poraprobar
+                        - var fecha = new Date(val.fecha_registro)
+                        tr
+                            td #{val.monto}
+                            td #{fecha.getUTCDate()} de #{meses[fecha.getUTCMonth()-1]}, #{fecha.getUTCFullYear()}
+    if prestamos.aprobados.length !== 0
+        section#sec_prestamos_en_proceso
+            h2 Préstamos desenbolsados, en proceso
+            table
+                thead
+                    tr
+                        th Monto
+                        th Fecha de la petición
+                        th Cuotas pagadas
+                tbody
+                    each val in prestamos.aprobados
+                        - var fecha = new Date(val.fecha_registro)
+                        tr
+                            td #{val.monto}
+                            td #{fecha.getUTCDate()} de #{meses[fecha.getUTCMonth()-1]}, #{fecha.getUTCFullYear()}
+                            td #{val.cuotas_pagadas}
+
+    if prestamos.finalizados.length !== 0
+        section#sec_prestamos_concluidos
+            h2 Préstamos concluidos
+
+    if prestamos.rechazados.length !== 0
+        section#sec_prestamos_rechazados
+            h2 Préstamos rechazados
+            table
+                thead
+                    tr
+                        th Monto
+                        th Fecha de la petición
+                tbody
+                    each val in prestamos.rechazados
+                        - var fecha = new Date(val.fecha_registro)
+                        tr
+                            td #{val.monto}
+                            td #{fecha.getUTCDate()} de #{meses[fecha.getUTCMonth()-1]}, #{fecha.getUTCFullYear()}
+
+    script.
+        const mi_capital = #{usuario.capital}
+        const en_deuda = #{usuario.en_deuda}
+        const procent_capital_permitido = #{reglas.tope_capital_prestamo}
+
+    script
+        include js/prestamos-utiles.js
+    script
+        include js/prestamos-pasarela.js
+    script
+        include js/prestamos-simulador.js

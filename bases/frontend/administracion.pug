@@ -1,0 +1,83 @@
+include segmentos/header.pug
+if err
+    section#error
+        h2 Ha habido un error
+            p Por favor informe al administrador (o sea Alejo Corredor)
+            h3 El error:
+            p #{err}
+else
+    - var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+    section
+        h2 Lista de usuarios
+        table
+            thead
+                tr
+                    th ID
+                    th Nombre
+                    th Apellido
+                    th Nueva contraseña
+            tbody
+                each usuario in usuarios
+                    tr
+                        td #{usuario.usuario_id}
+                        td #{usuario.nombres}
+                        td #{usuario.apellidos}
+                        td
+                            a(href='javascritp:alert(`Cambiar la contrasena`)') Cambiar contraseña
+    section
+    if prestamos_en_proceso.length !== 0
+        h2 Prestamos en proceso
+    section
+    if prestamos_por_aprobar.length === 0
+        h2 No hay prestamos pendientes de aprobación
+    else
+        h2 Prestamos por aprobar
+        table
+            thead
+                tr
+                    th Código
+                    th A nombre de:
+                    th Coodeudor(es)
+                    th Monto
+                    th Fecha de petición
+                    th Fecha de desembolso
+                    th(colspan='2') 
+            tbody
+                tr
+                    each prestamo in prestamos_por_aprobar
+                        td #{prestamo.prestamo_id}
+                        td #{prestamo.nombres} #{prestamo.apellidos}
+                        td Coodeudores
+                        td #{prestamo.monto}
+                        - var fecha_registro = new Date(prestamo.fecha_registro)
+                        td #{fecha_registro.getUTCDate()} de #{meses[fecha_registro.getUTCMonth()-1]}, #{fecha_registro.getUTCFullYear()}
+                        - var fecha_inicial = new Date(prestamo.fecha_registro)
+                        td #{fecha_inicial.getUTCDate()} de #{meses[fecha_inicial.getUTCMonth()-1]}, #{fecha_inicial.getUTCFullYear()}
+                        td
+                            - var vinculo_ok = 'javascript: prestamos('+prestamo.prestamo_id+',"aceptar")'
+                            a(href=vinculo_ok) Aprobar
+                        td
+                            - var vinculo_rec = 'javascript: prestamos('+prestamo.prestamo_id+',"rechazar")'
+                            a(href=vinculo_rec) Rechazar
+    
+    section
+    if movimientos.length === 0
+        h2 No hay movimientos pendientes de aprobación
+    else
+        h2 Movimientos por aprobar
+        table
+            thead
+                tr
+                    th Usuario
+                    th Monto
+                    th(colspan='3') Motivo
+            tbody
+                tr
+                    td x
+                    td x
+                    td x
+                    td Aprovar
+                    td Rechazar
+
+    script
+        include js/administracion.js

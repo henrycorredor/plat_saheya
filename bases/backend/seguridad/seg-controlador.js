@@ -7,14 +7,16 @@ const error = require("../utiles/errores")
 
 const secretojwt = config.jwt_secreto
 
-function caso(caso) {
+function caso(caso, rol) {
   function mediador(pet, res, siguiente) {
     switch (caso) {
       case "identificarse":
         compararClave(pet, res, siguiente);
         break
       case "validarFicha":
-        validarFicha(pet, siguiente);
+        validarFicha(pet, siguiente, rol);
+        break
+      case 'verificarPermiso':
         break
       default:
         siguiente()
@@ -25,9 +27,9 @@ function caso(caso) {
 }
 
 function generarFicha(pet, res) {
-  baseDatos.traerDato("usuarios", "usuario_id", `num_identificacion = '${pet.body.numIdentificacion}'`)
+  baseDatos.traerDato("usuarios", "usuario_id, rol", `num_identificacion = '${pet.body.numIdentificacion}'`)
     .then((dato) => {
-      const carga = { id: dato[0].usuario_id };
+      const carga = { id: dato[0].usuario_id, rol: dato[0].rol };
       const ficha = jsonwebtoken.sign(carga, secretojwt);
       respuestas.entregarFicha(res, ficha);
     })
@@ -36,7 +38,7 @@ function generarFicha(pet, res) {
     });
 }
 
-function validarFicha(pet, siguiente) {
+async function validarFicha(pet, siguiente, rol) {
   try {
     const cabecera = pet.headers.cookie || ""
     if (!cabecera || cabecera.indexOf("ficha=") === -1) {
@@ -44,9 +46,18 @@ function validarFicha(pet, siguiente) {
     }
     const ficha = cabecera.replace("ficha=", "")
     if (jsonwebtoken.verify(ficha, secretojwt)) {
-      siguiente()
+      if (!rol) {
+        siguiente()
+      } else {
+        const usuario = jsonwebtoken.decode(ficha, secretojwt)
+        if (usuario.rol === rol) {
+          siguiente()
+        } else {
+          throw error("No autorizado.", 401)
+        }
+      }
     } else {
-      throw error(res, "Por favor identifíquese." + err, 401);
+      throw error("Por favor identifíquese." + err, 401);
     }
   } catch (err) {
     siguiente(err)

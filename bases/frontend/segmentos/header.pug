@@ -1,5 +1,6 @@
+link(rel="icon", href="data:;base64,=")
 head
-    h1 Registrar un movimiento
+    h1 #{titulo}
     menu
         ul
             li
@@ -7,6 +8,11 @@ head
             li
                 a(href='/lista') Lista
             li
-                a(href='registrar') Registrar movimientos
+                a(href='/registrar') Registrar movimientos
+            li
+                a(href='/prestamos') Préstamos
             li
                 a(href='/inscribir') Inscribir
+            if usuario.rol === 5
+                li
+                    a(href='/administracion') Administración

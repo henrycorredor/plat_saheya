@@ -58,8 +58,10 @@ CREATE TABLE `prestamos`(
 PRIMARY KEY (`prestamo_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* ESTADO
-1 pagando
-2 finalizado */
+1 por aprobar
+2 pagando
+3 finalizado
+4 rechazado */
 
 CREATE TABLE `relaciones_coodeudores`(
 `id_relacion` int(5) unsigned NOT NULL AUTO_INCREMENT,

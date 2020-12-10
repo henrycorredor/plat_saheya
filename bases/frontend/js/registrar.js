@@ -19,6 +19,7 @@ function ingresarAlFormulario(arrayElementos) {
         p.append(elemento[0], elemento[1])
         formVariable.appendChild(p)
     })
+    formVariable.appendChild(document.createElement('span'))
 }
 
 function formAporte() {
@@ -46,6 +47,23 @@ document.querySelectorAll("input[name='motivo']").forEach(elemento => {
     })
 })
 
+function escaparCaracteres(cadena) {
+    const equivalencias = [
+        ["'", "[comilla]"],
+        ['"', '[comilla]'],
+        ["%", "[porciento]"],
+        ["_", "[guionbajo]"]
+    ]
+
+    let salidaCadena = cadena
+    const comparar = (caracteres) => {
+        const busqueda = new RegExp(`${caracteres[0]}`, "g")
+        salidaCadena = salidaCadena.replace(busqueda, `${caracteres[1]}`)
+    }
+    equivalencias.map(comparar)
+    return salidaCadena
+}
+
 const formulario = document.getElementsByTagName('form')[0]
 
 formulario.addEventListener('submit', evento => {
@@ -53,15 +71,12 @@ formulario.addEventListener('submit', evento => {
     let datos = {}
     Array.from(evento.target.getElementsByTagName('input')).forEach(elInput => {
         if ((!elInput.checked && elInput.type === 'radio') || elInput.name === '') {
-            console.log(elInput, 'no pasa')
             return
         } else {
-            console.log(elInput, 'pasa')
             datos[elInput.name] = elInput.value
         }
     })
-    console.log(datos)
-
+    datos.comentario = escaparCaracteres(datos.comentario)
     fetch('api/registrar_movimiento', {
         method: 'POST',
         headers: {
@@ -70,10 +85,14 @@ formulario.addEventListener('submit', evento => {
         body: JSON.stringify(datos)
     }).then(async function (response) {
         if (response.ok) {
-            const elDato = await response.json()
-            console.log('respuesta ', elDato)
+            document.querySelectorAll('#form_variable span')[0].innerText = 'Registro realizado.'
         }
-    }).catch(function (error) {
-        console.warn(error);
+        const elDato = await response.json()
+        console.log('miau', elDato)
+    }).catch(async function (error) {
+        console.warn(error)
+        const elDato = await error.json()
+        console.log('miau', elDato)
+        document.querySelectorAll('#form_variable span')[0].innerText = 'Ha ocurrido un error. Por favor reportelo a Alejo.'
     });
 })
