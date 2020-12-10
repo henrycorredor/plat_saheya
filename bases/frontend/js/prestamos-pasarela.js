@@ -108,6 +108,7 @@ function procesar_coodeudores(datos) {
                     cedula: input_cand_coodeudor.value,
                     monto: datos.capital_libre
                 })
+                datos.capital_libre
                 aval_en_proceso += parceInt(datos.capital_libre)
                 rotulo_coodeudor.innerText = 'Por favor inserte el número de cédula del siguiente coodeudor.'
                 e.target.remove()
