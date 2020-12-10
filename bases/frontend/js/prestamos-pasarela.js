@@ -1,6 +1,8 @@
 const formulario = document.getElementsByTagName('form')[0]
 const rotulo = document.getElementById('form_aviso')
 const bot_solicitar = document.getElementById('bot_solicitar')
+const rotulo_coodeudor = document.getElementById('coodeduor_rotulo')
+const pasarela_paso_2 = document.getElementById('form_pasarela_2')
 const prestamo = {
     monto: 0,
     fecha_inicial: '',
@@ -11,27 +13,34 @@ const prestamo = {
 }
 
 let estado = 1
-/*ESTADOS DE LA PASARELA
-1 - se ingresa el monto, si supera el permitido, pasa al estado 2, si no, se aplica directamente
-2 - se verifica un coodeudor, si no es suficiente, se verifican multiples coodeudores
-3 - se elabora verificacion con multiples coodeudores con multiples montos
-4 - los datos son integros y se puede entregar la solicitud
+let aval_en_proceso = 0
+/*
+ESTADOS DE LA PASARELA
+1 - se ingresa el monto, si supera el permitido, pasa al estado 2, si no, pasa a estado 3
+2 - se verifica un coodeudor, si no es suficiente, se verifican multiples coodeudores y pasa a 3
+3 - los datos son integros y se puede entregar la solicitud
 */
 
 formulario.addEventListener('submit', evento => {
     evento.preventDefault()
 })
 
+const rotuloTextoOriginal = rotulo.innerText
+
 document.getElementById('monto').addEventListener('input', evento => {
     prestamo.monto = evento.target.value
     if (prestamo.monto > prestamo.maximo_permitido) {
         prestamo.monto_respaldado = Math.ceil(prestamo.monto - prestamo.maximo_permitido)
-        bot_solicitar.value = 'Invitar coodeudor'
-        rotulo.innerText = `Monto superior al autorizado. Puede invitar un coodeudor para respaldar $${agregarPuntosCentenas(prestamo.monto_respaldado)}.`
+        bot_solicitar.disabled = true
+        rotulo.innerText = `Su solicitud excede por $${agregarPuntosCentenas(prestamo.monto_respaldado)} el monto autorizado. Puede invitar un coodeudor para que respalde su deuda.`
+        pasarela_paso_2.style.display = 'block'
+        estado = 2
     } else {
         prestamo.monto_respaldado = 0
-        rotulo.innerText = ""
-        bot_solicitar.value = 'Solicitar'
+        rotulo.innerText = rotuloTextoOriginal
+        bot_solicitar.disabled = false
+        pasarela_paso_2.style.display = 'none'
+        estado = 4
     }
 })
 
@@ -43,6 +52,100 @@ document.getElementById('fecha_inicial').addEventListener('input', e => {
     prestamo.fecha_inicial = e.target.value
 })
 
+document.getElementById('bot_revisar').addEventListener('click', async e => {
+    rotulo_coodeudor.style.display = 'block'
+    rotulo_coodeudor.innerText = 'Espere un momento por favor...'
+    try {
+        const datos = await verificarCedula(document.getElementById('input_cand_coodeudor').value)
+        if (datos.existe) {
+            procesar_coodeudores(datos)
+        } else {
+            rotulo_coodeudor.innerText = datos.mensaje
+        }
+    } catch (error) {
+        let mensaje = (!error.mensaje) ? 'Ha habido un error en el sistema, por favor reporte a Alejo.' : error.mensaje
+        document.getElementById('coodeduor_rotulo').innerText = mensaje
+        e.target.disabled = true
+    }
+})
+
+function procesar_coodeudores(datos) {
+    rotulo_coodeudor.style.display = 'block'
+    if (parseInt(datos.capital_libre) === 0) {
+        rotulo_coodeudor.innerText = `${datos.nombre} no tiene cupo disponible. Por favor solicite soporte a otro usuario.`
+        input_cand_coodeudor.value = ''
+    } else if (datos.capital_libre >= prestamo.monto_respaldado && aval_en_proceso === 0) {
+        rotulo_coodeudor.innerText = `El cupo de ${datos.nombre} es suficiente para respaldar su crédito. ¿Confirma que desea invitarlo como coodeudor?`
+        const aceptar = generarDOM('a', { innerText: 'Si' }, pasarela_paso_2)
+        const cancelar = generarDOM('a', { innerText: 'No' }, pasarela_paso_2)
+        aceptar.addEventListener('click', e => {
+            e.preventDefault()
+            prestamo.coodeudores.push({
+                nombre: datos.nombre,
+                cedula: input_cand_coodeudor.value,
+                monto: prestamo.monto_respaldado
+            })
+            pasarela_paso_2.style.display = 'none'
+            rotulo.innerText = `Su solicitud de préstamo es de ${prestamo.monto}, con un monto avalado por ${prestamo.coodeudores[0].nombre} por la suma de ${prestamo.coodeudores[0].monto}. Puede proceder con la solicitud.`
+            bot_solicitar.disabled = false
+        })
+        cancelar.addEventListener('click', e => {
+            e.preventDefault()
+            rotulo_coodeudor.innerText = 'Por favor inserte un número de cédula.'
+            input_cand_coodeudor.value = ''
+            aceptar.remove()
+            e.target.remove()
+        })
+    } else {
+        if (prestamo.monto_respaldado - aval_en_proceso > datos.capital_libre) {
+            rotulo_coodeudor.innerText = `${datos.nombre} solo puede avalar ${agregarPuntosCentenas(datos.capital_libre)}. ¿Desea agregarlo a la lista de coodeudores y seguir invitando coodeudores?`
+            const aceptar = generarDOM('a', { innerText: 'Si' }, pasarela_paso_2)
+            const cancelar = generarDOM('a', { innerText: 'No' }, pasarela_paso_2)
+            aceptar.addEventListener('click', e => {
+                e.preventDefault()
+                prestamo.coodeudores.push({
+                    nombre: datos.nombre,
+                    cedula: input_cand_coodeudor.value,
+                    monto: datos.capital_libre
+                })
+                aval_en_proceso += parceInt(datos.capital_libre)
+                rotulo_coodeudor.innerText = 'Por favor inserte el número de cédula del siguiente coodeudor.'
+                e.target.remove()
+                cancelar.remove()
+            })
+            cancelar.addEventListener('click', e => {
+                e.preventDefault()
+                rotulo_coodeudor.innerText = 'Por favor inserte un número de cédula.'
+                input_cand_coodeudor.value = ''
+                aceptar.remove()
+                e.target.remove()
+            })
+        } else {
+            rotulo_coodeudor.innerText = `${datos.nombre} puede avalar ${agregarPuntosCentenas(prestamo.monto_respaldado - aval_en_proceso)}. Una vez lo agregue a la lista de coodeudores puede proceder con la solicitud. ¿Desea agregarlo?`
+            const aceptar = generarDOM('a', { innerText: 'Si' }, pasarela_paso_2)
+            const cancelar = generarDOM('a', { innerText: 'No' }, pasarela_paso_2)
+            aceptar.addEventListener('click', e => {
+                e.preventDefault()
+                prestamo.coodeudores.push({
+                    nombre: datos.nombre,
+                    cedula: input_cand_coodeudor.value,
+                    monto: prestamo.monto_respaldado - aval_en_proceso
+                })
+                aval_en_proceso += parceInt(datos.capital_libre)
+                pasarela_paso_2.style.display = 'none'
+                bot_solicitar.disabled = false
+            })
+            cancelar.addEventListener('click', e => {
+                e.preventDefault()
+                rotulo_coodeudor.innerText = 'Por favor inserte un número de cédula.'
+                input_cand_coodeudor.value = ''
+                aceptar.remove()
+                e.target.remove()
+            })
+        }
+    }
+}
+
 function verificarCedula(numero_cedula) {
     return new Promise((resuelto, rechazado) => {
         fetch(`api/verificar_coodeudor?num_identificacion=${numero_cedula}`)
@@ -51,10 +154,9 @@ function verificarCedula(numero_cedula) {
                     const dato = await res.json()
                     resuelto(dato.body)
                 } else {
-                    rotulo.innerText = 'Ha ocurrido un error. Por favor reportelo a Alejo.'
+                    rechazado(res)
                 }
             }).catch(e => {
-                rotulo.innerText = 'Ha ocurrido un error. Por favor reportelo a Alejo.'
                 rechazado(e)
             })
     })
@@ -80,7 +182,8 @@ function producirTablaCoodeudores(datos) {
     }
 }
 
-bot_solicitar.addEventListener('click', async e => {
+//bot_solicitar.addEventListener('click', async e => {
+async function procesar() {
     switch (estado) {
         case 1:
             if (prestamo.monto === '' || prestamo.monto === '0') {
@@ -100,7 +203,6 @@ bot_solicitar.addEventListener('click', async e => {
 
             if (prestamo.monto_respaldado > 0) {
                 document.getElementById('form_pasarela_1').style.display = 'none'
-                document.getElementById('form_pasarela_2').style.display = 'block'
                 e.target.value = 'Verificar cédula'
                 estado = 2
             } else {
@@ -163,7 +265,7 @@ bot_solicitar.addEventListener('click', async e => {
         default:
             return
     }
-})
+}
 
 function aplicarPrestamo() {
     let permitido = true
