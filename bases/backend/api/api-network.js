@@ -13,6 +13,7 @@ enrutador.post('/inscribir', seg.caso('validarFicha'), inscribir)
 enrutador.post('/registrar_movimiento', seg.caso('validarFicha'), reg_movimiento)
 enrutador.post('/aplicar_prestamo', seg.caso('validarFicha'), aplicar_prestamo)
 enrutador.post('/apr_prestamo', seg.caso('validarFicha', 5), apr_prestamo)
+enrutador.post('/autorizar_coodeudor', seg.caso('validarFicha'), autorizar_coodeudor)
 
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
@@ -56,10 +57,14 @@ async function reg_movimiento(pet, res) {
 
 async function aplicar_prestamo(pet, res) {
     try {
-        await controlador.aplicarPrestamo(pet)
-        respuestas.exito(res, 'registrado')
-    } catch (error) {
-        respuestas.error(res, error)
+        const respuesta = await controlador.aplicarPrestamo(pet)
+        respuestas.exito(res, respuesta)
+    } catch (err) {
+        if (err.error === 0) {
+            respuestas.error(res, error)
+        } else {
+            respuestas.error(res, err, err.error)
+        }
     }
 }
 
@@ -77,6 +82,16 @@ async function apr_prestamo(pet, res) {
         const respuesta = await controlador.aprov_prestamo(pet)
         respuestas.exito(res, respuesta)
     } catch (error) {
+        respuestas.error(res, error)
+    }
+}
+
+async function autorizar_coodeudor(pet, res) {
+    try {
+        const resultado = await controlador.autorizar_coodeudor(pet)
+        respuestas.exito(res, resultado)
+    } catch (error) {
+        console.log(error)
         respuestas.error(res, error)
     }
 }

@@ -118,7 +118,7 @@ function actualizar(tabla, dato, condicion) {
     })
 }
 
-function prestamosNoAprobados() {
+function prestamosPorAprobar() {
     return new Promise((res, rec) => {
         const query = `SELECT p.prestamo_id, u.nombres, u.apellidos, p.monto, p.fecha_registro, p.fecha_inicial FROM prestamos p JOIN usuarios u ON p.deudor_id = u.usuario_id WHERE p.estado = 1;`
         mysqlConectar.query(query, (error, datos) => {
@@ -137,4 +137,4 @@ function consultaLibre(query) {
     })
 }
 
-module.exports = { consultaLibre, agregarUsuario, listar, retornarContrasenia, traerDato, traerDatoUnico, regAbonoCapital, insertar, actualizar, prestamosNoAprobados }
+module.exports = { consultaLibre, agregarUsuario, listar, retornarContrasenia, traerDato, traerDatoUnico, regAbonoCapital, insertar, actualizar, prestamosPorAprobar }

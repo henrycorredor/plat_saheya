@@ -11,19 +11,32 @@ else
         p Rol: #{usuario.rol}, ID: #{usuario.usuario_id}
     if coodeudor_por_aprobar.length !== 0
         each peticion in coodeudor_por_aprobar
-            section
+            -var section_id = "coodeudor_"+peticion.id_relacion
+            section.tarjeta(id=section_id)
                 h2 #{peticion.nombres} #{peticion.apellidos} ha solicitado su respaldo.
                 p El usuario #{peticion.nombres} #{peticion.apellidos} ha solicitado un préstamo por el total de $#{peticion.monto}, y a pedido que usted le avale $#{peticion.monto_avalado}.
                 p ¿Está usted de acuerdo?
-                    a(href="") Si, estoy de acuerdo.
-                    a(href='') No, deseo rechazarlo.
-
-    #resumen_prestamo.tarjeta_resumen
-        h2 Cuota mínima de este mes:
-        span (por fijar)
-    #tarjeta_resumen
-        .barra_resumen Capital libre: #{usuario.capital}
-        .barra_resumen En deuda: #{usuario.en_deuda}
-
-    section
-        #transacciones.section_tarjeta ... cargando ...
+                    -var aceptar = "javascript:coodeudor('"+peticion.id_relacion+"',true)"
+                    -var cancelar = "javascript:coodeudor('"+peticion.id_relacion+"',false)"
+                    a(href=aceptar) Si, estoy de acuerdo.
+                    a(href=cancelar) No, deseo rechazarlo.
+    if cuota_este_mes.length !== 0
+        each prestamo in cuota_este_mes
+            section.tarjeta
+                if prestamo.estado === 0
+                    p La primera cuota del préstamo #{prestamo.id} se podrá pagar despues del #{prestamo.fecha_inicial}
+                    p Cuota: $#{prestamo.cuota}
+                    p Abono a capital: $#{prestamo.abono_capital}
+                    p Intereses: $#{prestamo.interes}
+                if prestamo.estado === 1
+                    h1 Cuota numero #{prestamo.cuota_numero} del prestamo ##{prestamo.id} para este mes:
+                    p Cuota ##{prestamo.cuota_numero}
+                    p Periodo del #{prestamo.fecha_inicial} / #{prestamo.fecha_limite}
+                    p Total cuota: $#{prestamo.cuota}
+                    p Abono a capital: $#{prestamo.abono_capital}
+                    p Interés: $#{prestamo.interes}
+                if prestamo.estado === 2
+                    p La cuota ##{prestamo.cuota_numero} del prestamo ##{prestamo.id} está vencida.
+                    p Esto genera multas que el sistema todavía no ha calculado.
+    script
+        include js/portada.js

@@ -29,8 +29,18 @@ async function prestamos(id, accion) {
         }
         const resultado = await ajax('api/apr_prestamo', datos)
         const res_util = await resultado.json()
-        console.log(res_util.body)
+        document.querySelectorAll(`#columna_${id} .boton`).forEach(boton => {
+            boton.innerHTML = ''
+        })
+        if (res_util.body.res) {
+            document.querySelector(`#columna_${id} .aprobar`).innerText = res_util.body.mensaje
+        } else {
+            document.querySelector(`#columna_${id} .aprobar`).innerText = "Error. Por favor reportelo."
+        }
     } catch (error) {
-        console.log('Se registro un error: ' + error)
+        document.querySelectorAll(`#columna_${id} .boton`).forEach(boton => {
+            boton.innerHTML = ''
+        })
+        document.querySelector(`#columna_${id} .aprobar`).innerText = "Error. Por favor reportelo."
     }
 }

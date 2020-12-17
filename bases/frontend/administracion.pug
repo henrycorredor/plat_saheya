@@ -25,59 +25,116 @@ else
                         td
                             a(href='javascritp:alert(`Cambiar la contrasena`)') Cambiar contraseña
     section
-    if prestamos_en_proceso.length !== 0
-        h2 Prestamos en proceso
+        if prestamos_en_proceso.length === undefined
+            h2 No hay prestamos en proceso
+        else
+            h2 Prestamos en proceso
+            table
+                thead
+                    tr
+                        th Código
+                        th A nombre de:
+                        th Fecha de desembolso
+                        th Cuotas / Pagadas
+                        th Monto
+                        th Pagado
+                        th Estado
+                tbody
+                    each prestamo in prestamos_en_proceso
+                        tr
+                            td #{prestamo.prestamo_id}
+                            td #{prestamo.nombres} #{prestamo.apellidos}
+                            - var fecha = new Date(prestamo.fecha_inicial)
+                            td #{fecha.getUTCDate()} de #{meses[fecha.getUTCMonth()-1]}, #{fecha.getUTCFullYear()}
+                            td #{prestamo.num_cuotas} / #{prestamo.cuotas_pagadas}
+                            td #{prestamo.monto}
+                            td #{prestamo.pagado}
+                            td Al día
     section
-    if prestamos_por_aprobar.length === 0
-        h2 No hay prestamos pendientes de aprobación
-    else
-        h2 Prestamos por aprobar
-        table
-            thead
-                tr
-                    th Código
-                    th A nombre de:
-                    th Coodeudor(es)
-                    th Monto
-                    th Fecha de petición
-                    th Fecha de desembolso
-                    th(colspan='2') 
-            tbody
-                tr
+        if prestamos_por_aprobar.length === 0
+            h2 No hay prestamos pendientes de aprobación
+        else
+            h2 Prestamos por aprobar
+            table
+                thead
+                    tr
+                        th Código
+                        th A nombre de:
+                        th Coodeudor(es)
+                        th Monto
+                        th Fecha de petición
+                        th Fecha de desembolso
+                        th(colspan='2') 
+                tbody
                     each prestamo in prestamos_por_aprobar
-                        td #{prestamo.prestamo_id}
-                        td #{prestamo.nombres} #{prestamo.apellidos}
-                        td Coodeudores
-                        td #{prestamo.monto}
-                        - var fecha_registro = new Date(prestamo.fecha_registro)
-                        td #{fecha_registro.getUTCDate()} de #{meses[fecha_registro.getUTCMonth()-1]}, #{fecha_registro.getUTCFullYear()}
-                        - var fecha_inicial = new Date(prestamo.fecha_registro)
-                        td #{fecha_inicial.getUTCDate()} de #{meses[fecha_inicial.getUTCMonth()-1]}, #{fecha_inicial.getUTCFullYear()}
-                        td
-                            - var vinculo_ok = 'javascript: prestamos('+prestamo.prestamo_id+',"aceptar")'
-                            a(href=vinculo_ok) Aprobar
-                        td
-                            - var vinculo_rec = 'javascript: prestamos('+prestamo.prestamo_id+',"rechazar")'
-                            a(href=vinculo_rec) Rechazar
-    
+                        - var columna_id = 'columna_'+prestamo.prestamo_id
+                        tr(id=columna_id)
+                            td #{prestamo.prestamo_id}
+                            td #{prestamo.nombres} #{prestamo.apellidos}
+                            td 
+                                if coodeudores[prestamo.prestamo_id].length === 0
+                                    span No
+                                else
+                                    each coodeudor in coodeudores[prestamo.prestamo_id]
+                                        p #{coodeudor.nombres} #{coodeudor.apellidos} - $#{coodeudor.monto_avalado}
+
+                            td #{prestamo.monto}
+                            - var fecha_registro = new Date(prestamo.fecha_registro)
+                            td #{fecha_registro.getUTCDate()} de #{meses[fecha_registro.getUTCMonth()-1]}, #{fecha_registro.getUTCFullYear()}
+                            - var fecha_inicial = new Date(prestamo.fecha_registro)
+                            td #{fecha_inicial.getUTCDate()} de #{meses[fecha_inicial.getUTCMonth()-1]}, #{fecha_inicial.getUTCFullYear()}
+                            td.boton.aprobar
+                                - var vinculo_ok = 'javascript: prestamos('+prestamo.prestamo_id+',"aceptar")'
+                                a(href=vinculo_ok) Aprobar
+                            td.boton.aprobar
+                                - var vinculo_rec = 'javascript: prestamos('+prestamo.prestamo_id+',"rechazar")'
+                                a(href=vinculo_rec) Rechazar
     section
-    if movimientos.length === 0
-        h2 No hay movimientos pendientes de aprobación
-    else
-        h2 Movimientos por aprobar
-        table
-            thead
-                tr
-                    th Usuario
-                    th Monto
-                    th(colspan='3') Motivo
-            tbody
-                tr
-                    td x
-                    td x
-                    td x
-                    td Aprovar
-                    td Rechazar
+        if prestamos_esperando_coodeudores.length === 0
+            h2 No hay préstamos en espera de aprobación de los coodeudores
+        else
+            h2 Préstamos en espera de aprobación de los coodeudores
+            table
+                thead
+                    tr
+                        th Código
+                        th A nombre de
+                        th Monto
+                        th Fecha de petición
+                        th Fecha de desembolso
+                        th Coodeudor(es)
+                    tbody
+                        each prestamo in prestamos_esperando_coodeudores
+                            tr
+                                td #{prestamo.prestamo_id}
+                                td #{prestamo.nombres} #{prestamo.apellidos}
+                                td #{prestamo.monto}
+                                - var fecha_registro = new Date(prestamo.fecha_registro)
+                                td #{fecha_registro.getUTCDate()} de #{meses[fecha_registro.getUTCMonth()-1]}, #{fecha_registro.getUTCFullYear()}
+                                - var fecha_inicial = new Date(prestamo.fecha_registro)
+                                td #{fecha_inicial.getUTCDate()} de #{meses[fecha_inicial.getUTCMonth()-1]}, #{fecha_inicial.getUTCFullYear()}
+                                td
+                                    each coodeudor in lista_coodeudores_en_espera[prestamo.prestamo_id]
+                                        - var estado = ['No aprobado','Aprobado','Pendiente de aprobación']
+                                        p #{coodeudor.nombres} #{coodeudor.apellidos} - #{coodeudor.monto_avalado} - #{estado[parseInt(coodeudor.aprobado)]}
+    section
+        if movimientos.length === 0
+            h2 No hay movimientos pendientes de aprobación
+        else
+            h2 Movimientos por aprobar
+            table
+                thead
+                    tr
+                        th Usuario
+                        th Monto
+                        th(colspan='3') Motivo
+                tbody
+                    tr
+                        td x
+                        td x
+                        td x
+                        td Aprovar
+                        td Rechazar
 
     script
         include js/administracion.js
