@@ -1,15 +1,18 @@
 include segmentos/header.pug
-section
-    form
-        #form_fijo
-            label(for='1') Abono a capital
-            input(type='radio' name='motivo' value='1')
-            label(for='2') Abono a préstamo
-            input(type='radio' name='motivo' value='2')
+if err
+    section#error
+        h2 Ha habido un error
+            p Por favor informe al administrador (o sea Alejo Corredor)
+            h3 El error:
+            p #{err}
+else
+    p Para empezar, por favor tome una foto al comprobante de la transacción y súbala al sistema.
+    form#formulario(enctype="multipart/form-data" method="post")
+        p
+            label(for='recibo')
+            input(type='file' name='recibo')
+        p
+            input(type='submit' value='Cargar')
 
-            input(type='submit')
-        #form_variable
-            span.aviso
-
-script
-    include js/registrar.js
+    script
+        include js/registrar.js

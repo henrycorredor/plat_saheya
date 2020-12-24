@@ -19,6 +19,9 @@ async function pugPlantilla(pet, res, plantilla, tituloPagina) {
         case 'administracion':
             administracion(res, { usuario: infoUsuario, titulo: tituloPagina })
             break
+        case 'registrar':
+            registrar(res, { usuario: infoUsuario, titulo: tituloPagina })
+            break
         default:
             plantillas.pugTemplate(res, plantilla, { usuario: infoUsuario, titulo: tituloPagina })
             break
@@ -86,7 +89,6 @@ async function portada(res, datos) {
                 estado: estado
             }
         }
-        console.log('a ver', cuota_este_mes)
         plantillas.pugTemplate(res, 'portada', { ...datos, coodeudor_por_aprobar, cuota_este_mes })
     } catch (error) {
         console.log(error)
@@ -183,6 +185,16 @@ async function administracion(res, datos) {
         plantillas.pugTemplate(res, 'administracion', i)
     } catch (error) {
         plantillas.pugTemplate(res, 'prestamos', { ...datos, err: error })
+    }
+}
+
+async function registrar(res, datos) {
+    try {
+        console.log(datos)
+        const deudas = await DB.traerDato('prestamos', '*', `deudor_id = ${datos.usuario.usuario_id}`)
+        plantillas.pugTemplate(res, 'registrar', {...datos, prestamos: deudas})
+    } catch (error) {
+        plantillas.pugTemplate(res, 'registrar', { ...datos, err: error })
     }
 }
 
