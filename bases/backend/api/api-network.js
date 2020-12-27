@@ -15,8 +15,6 @@ enrutador.post('/aplicar_prestamo', seg.caso('validarFicha'), aplicar_prestamo)
 enrutador.post('/apr_prestamo', seg.caso('validarFicha', 5), apr_prestamo)
 enrutador.post('/autorizar_coodeudor', seg.caso('validarFicha'), autorizar_coodeudor)
 
-enrutador.put('/recibir_imagenes', seg.caso('validarFicha'), recibir_imagenes)
-
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
     res.json(pet.body)
@@ -110,7 +108,8 @@ function imageFilter(req, file, cb) {
     cb(null, true);
 };
 
-async function recibir_imagenes(req, res) {
+enrutador.post('/recibir_imagenes', (req, res) => {
+    console.log(req.file)
     console.log(req.body)
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -138,9 +137,8 @@ async function recibir_imagenes(req, res) {
         } else {
             respuestas.exito(res, 'hecho')
         }
-    });
+    })
 
-
-}
+})
 
 module.exports = enrutador
