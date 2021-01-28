@@ -1,8 +1,9 @@
 const express = require('express')
+const multer = require('multer')
 const controlador = require('./api-controlador')
 const seg = require('../seguridad/seg-controlador')
 const respuestas = require('../utiles/respuestas')
-const lanzaError = require('../utiles/errores')
+const path = require('path')
 
 const enrutador = express.Router()
 
@@ -15,7 +16,18 @@ enrutador.post('/aplicar_prestamo', seg.caso('validarFicha'), aplicar_prestamo)
 enrutador.post('/apr_prestamo', seg.caso('validarFicha', 5), apr_prestamo)
 enrutador.post('/autorizar_coodeudor', seg.caso('validarFicha'), autorizar_coodeudor)
 
-enrutador.put('/recibir_imagenes', seg.caso('validarFicha'), recibir_imagenes)
+const almacenamiento = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '../../imagenes/recibos'))
+    },
+    filename: function (req, file, cb) {
+        console.log(file)
+        cb(null, file.originalname)
+    }
+})
+
+const cargarRecibo = multer({ storage: almacenamiento })
+enrutador.put('/recibir_imagenes', [seg.caso('validarFicha'), cargarRecibo.single('recibo')], recibir_imagenes)
 
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
@@ -98,49 +110,13 @@ async function autorizar_coodeudor(pet, res) {
     }
 }
 
-const multer = require('multer')
-const path = require('path')
-
-function imageFilter(req, file, cb) {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-        req.fileValidationError = 'Only image files are allowed!';
-        return cb(new Error('Only image files are allowed!'), false);
-    }
-    cb(null, true);
-};
-
 async function recibir_imagenes(req, res) {
-    console.log(req.body)
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'cargas/')
-        },
-        filename: function (req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
-        }
-    })
-
-    let upload = multer({ storage: storage, fileFilter: imageFilter }).single('recibo')
-    upload(req, res, function (err) {
-        console.log('file: ', req.file, 'body: ', req.body)
-        if (req.fileValidationError) {
-            respuestas.error(res, req.fileValidationError)
-        }
-        else if (!req.file) {
-            respuestas.error(res, 'Please select an image to upload')
-        }
-        else if (err instanceof multer.MulterError) {
-            respuestas.error(res, err)
-        }
-        else if (err) {
-            respuestas.error(res, err)
-        } else {
-            respuestas.exito(res, 'hecho')
-        }
-    });
-
-
+    try {
+        respuestas.exito(res, { mensaje: 'hecho' })
+    } catch (error) {
+        console.log(error)
+        respuestas.error(res, error)
+    }
 }
 
 module.exports = enrutador

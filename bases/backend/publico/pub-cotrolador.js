@@ -190,7 +190,7 @@ async function administracion(res, datos) {
 
 async function registrar(res, datos) {
     try {
-        console.log(datos)
+        //console.log(datos)
         const deudas = await DB.traerDato('prestamos', '*', `deudor_id = ${datos.usuario.usuario_id}`)
         plantillas.pugTemplate(res, 'registrar', {...datos, prestamos: deudas})
     } catch (error) {

@@ -7,7 +7,7 @@ if err
             p #{err}
 else
     p Para empezar, por favor tome una foto al comprobante de la transacción y súbala al sistema.
-    form#formulario(enctype="multipart/form-data" method="post")
+    form#formulario(enctype="multipart/form-data" method="put" action="/api/recibir_imagenes")
         p
             label(for='recibo')
             input(type='file' name='recibo')
