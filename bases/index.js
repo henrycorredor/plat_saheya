@@ -8,7 +8,7 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const aplicacion = express()
 
-aplicacion.use(express.urlencoded({ extended: true }))
+//aplicacion.use(express.urlencoded({ extended: true }))
 aplicacion.use(express.json())
 aplicacion.use(bodyParser.json({ limit: "50mb" }))
 aplicacion.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }))
