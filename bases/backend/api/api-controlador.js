@@ -200,4 +200,16 @@ function autorizar_coodeudor(pet) {
     })
 }
 
-module.exports = { inscribir, listar, registrarMovimiento, aplicarPrestamo, ver_coodeudor, aprov_prestamo, autorizar_coodeudor }
+function img_reg_mov(pet) {
+    return new Promise(async (resuelto, rechazado) => {
+        try {
+            const datosUsuario = await usuarioInfo(pet)
+            const imagen = await baseDatos.traerDatoUnico('imagenes', 'imagen_id, formato', `en_cache = 1 AND autor = ` + datosUsuario.usuario_id + ` ORDER BY fecha_registro DESC LIMIT 1`)
+            resuelto({ mensaje: `${imagen.imagen_id}` })
+        } catch (error) {
+            rechazado({ mensaje: error })
+        }
+    })
+}
+
+module.exports = { inscribir, listar, registrarMovimiento, aplicarPrestamo, ver_coodeudor, aprov_prestamo, autorizar_coodeudor, img_reg_mov }

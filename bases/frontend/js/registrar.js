@@ -12,9 +12,17 @@ document.getElementById('formulario').addEventListener('submit', evento => {
     })
         .then(response => response.json())
         .then(result => {
-            console.log('Success:', result);
+            recibirFoto(result.body.mensaje)
         })
         .catch(error => {
             console.log('Error:', error);
         })
 })
+
+function recibirFoto(url) {
+    const contenedor = document.getElementById('contenedor')
+    contenedor.innerHTML = ''
+    const imagen = document.createElement('img')
+    imagen.setAttribute('src', `/api/pic_en_proceso/${url}`)
+    contenedor.appendChild(imagen)
+}

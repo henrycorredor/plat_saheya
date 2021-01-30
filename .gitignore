@@ -6,6 +6,7 @@
 .pnp.js
 /upload_files
 /enviar_archivos
+/bases/imagenes
 
 # testing
 /coverage

@@ -1,9 +1,8 @@
 const express = require('express')
-const multer = require('multer')
 const controlador = require('./api-controlador')
 const seg = require('../seguridad/seg-controlador')
 const respuestas = require('../utiles/respuestas')
-const path = require('path')
+const manejador_imagenes = require('../utiles/manejador_imagenes')
 
 const enrutador = express.Router()
 
@@ -15,19 +14,9 @@ enrutador.post('/registrar_movimiento', seg.caso('validarFicha'), reg_movimiento
 enrutador.post('/aplicar_prestamo', seg.caso('validarFicha'), aplicar_prestamo)
 enrutador.post('/apr_prestamo', seg.caso('validarFicha', 5), apr_prestamo)
 enrutador.post('/autorizar_coodeudor', seg.caso('validarFicha'), autorizar_coodeudor)
+enrutador.put('/recibir_imagenes', [seg.caso('validarFicha'), manejador_imagenes.single('recibo')], recibir_imagenes)
 
-const almacenamiento = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../../imagenes/recibos'))
-    },
-    filename: function (req, file, cb) {
-        console.log(file)
-        cb(null, file.originalname)
-    }
-})
-
-const cargarRecibo = multer({ storage: almacenamiento })
-enrutador.put('/recibir_imagenes', [seg.caso('validarFicha'), cargarRecibo.single('recibo')], recibir_imagenes)
+enrutador.get('/pic_en_proceso/:pic_id', seg.caso('validarFicha'), servir_foto)
 
 enrutador.post('/experimentos', (pet, res) => {
     console.log(pet.body)
@@ -112,11 +101,19 @@ async function autorizar_coodeudor(pet, res) {
 
 async function recibir_imagenes(req, res) {
     try {
-        respuestas.exito(res, { mensaje: 'hecho' })
+        const resultado = await controlador.img_reg_mov(req)
+        respuestas.exito(res, resultado)
     } catch (error) {
         console.log(error)
         respuestas.error(res, error)
     }
+}
+
+const path = require('path')
+
+function servir_foto(req, res) {
+    const img_url = path.join(__dirname, '../../imagenes/en_proceso') + `/${req.params.pic_id}.jpg`
+    res.sendFile(img_url)
 }
 
 module.exports = enrutador
