@@ -205,7 +205,18 @@ function img_reg_mov(pet) {
         try {
             const datosUsuario = await usuarioInfo(pet)
             const imagen = await baseDatos.traerDatoUnico('imagenes', 'imagen_id, formato', `en_cache = 1 AND autor = ` + datosUsuario.usuario_id + ` ORDER BY fecha_registro DESC LIMIT 1`)
-            resuelto({ mensaje: `${imagen.imagen_id}` })
+            const deudas = await baseDatos.traerDato('prestamos', '*', `deudor_id = ${datosUsuario.usuario_id} AND estado = 2`)
+            const deudasArray = []
+            for (let i = 0; i < deudas.length; i++) {
+                deudasArray[i] = {
+                    id: deudas[i].prestamo_id,
+                    monto: deudas[i].monto,
+                    en_deuda: parseInt(deudas[i].monto) - parseInt(deudas[i].pagado),
+                    cuota: parseInt(deudas[i].monto) / parseInt(deudas[i].num_cuotas),
+                    interes: (parseInt(deudas[i].monto) - parseInt(deudas[i].pagado)) * 0.08
+                }
+            }
+            resuelto({ pic_id: `${imagen.imagen_id}`, deudas: deudasArray })
         } catch (error) {
             rechazado({ mensaje: error })
         }
