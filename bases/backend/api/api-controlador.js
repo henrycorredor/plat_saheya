@@ -200,4 +200,27 @@ function autorizar_coodeudor(pet) {
     })
 }
 
-module.exports = { inscribir, listar, registrarMovimiento, aplicarPrestamo, ver_coodeudor, aprov_prestamo, autorizar_coodeudor }
+function img_reg_mov(pet) {
+    return new Promise(async (resuelto, rechazado) => {
+        try {
+            const datosUsuario = await usuarioInfo(pet)
+            const imagen = await baseDatos.traerDatoUnico('imagenes', 'imagen_id, formato', `en_cache = 1 AND autor = ` + datosUsuario.usuario_id + ` ORDER BY fecha_registro DESC LIMIT 1`)
+            const deudas = await baseDatos.traerDato('prestamos', '*', `deudor_id = ${datosUsuario.usuario_id} AND estado = 2`)
+            const deudasArray = []
+            for (let i = 0; i < deudas.length; i++) {
+                deudasArray[i] = {
+                    id: deudas[i].prestamo_id,
+                    monto: deudas[i].monto,
+                    en_deuda: parseInt(deudas[i].monto) - parseInt(deudas[i].pagado),
+                    cuota: parseInt(deudas[i].monto) / parseInt(deudas[i].num_cuotas),
+                    interes: (parseInt(deudas[i].monto) - parseInt(deudas[i].pagado)) * 0.08
+                }
+            }
+            resuelto({ pic_id: `${imagen.imagen_id}`, deudas: deudasArray })
+        } catch (error) {
+            rechazado({ mensaje: error })
+        }
+    })
+}
+
+module.exports = { inscribir, listar, registrarMovimiento, aplicarPrestamo, ver_coodeudor, aprov_prestamo, autorizar_coodeudor, img_reg_mov }

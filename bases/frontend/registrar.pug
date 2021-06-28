@@ -6,13 +6,14 @@ if err
             h3 El error:
             p #{err}
 else
-    p Para empezar, por favor tome una foto al comprobante de la transacción y súbala al sistema.
-    form#formulario(enctype="multipart/form-data" method="put" action="/api/recibir_imagenes")
-        p
-            label(for='recibo')
-            input(type='file' name='recibo')
-        p
-            input(type='submit' value='Cargar')
+    #contenedor
+        p Para empezar, por favor tome una foto al comprobante de la transacción y súbala al sistema.
+        form#formulario(enctype="multipart/form-data" method="put" action="/api/recibir_imagenes")
+            p
+                label(for='recibo')
+                input(type='file' name='recibo'  accept="image/png, image/jpeg")
+            p
+                input(type='submit' value='Cargar')
 
     script
         include js/registrar.js
