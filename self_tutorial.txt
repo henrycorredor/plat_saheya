@@ -1,0 +1,29 @@
+- Controladores
+  - Middlewares
+  - Routers
+    -> API
+      -> Json
+
+- Servicios
+  - Procesos lógicos
+
+- Librerias
+  - Modelos -> APIS / DB
+
+
+/////
+
+Config - Lib - Servicios - Utils
+
+
+//////
+
+VIM:
+i -> insert mode
+esc -> normal mode
+:q -> quitar
+:w -> guardar
+:wq -> guardar y salir
+:q! -> salir sin guardar cambios
+u -> deshacer
+ctl + r -> rehacer
