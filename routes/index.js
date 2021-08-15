@@ -1,8 +1,11 @@
-const usersRouter = require('./users')
-const loansRouter = require('./loans')
+const usersRouter = require('./router_users')
+const loansRouter = require('./router_loans')
 
-module.exports = function (app) {
-    console.log('se agregan las rutas')
+const swaggerUi = require('swagger-ui-express')
+const swaggerDoc = require('../utils/documentation/swagger.json')
+
+module.exports = function (app) {    
     app.use('/api/user', usersRouter)
     app.use('/api/loan', loansRouter)
+    app.use('/api/documentation', swaggerUi.serve, swaggerUi.setup(swaggerDoc))
 }
