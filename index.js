@@ -6,9 +6,12 @@ const { errorHandler, errorLogger, errorWrapper } = require('./utils/errorHander
 
 const routes = require('./routes')
 
+const notFoundHandler = require('./utils/notFoundHandler')
+
 app.use(express.json())
 
 routes(app)
+app.use(notFoundHandler)
 
 app.use(errorLogger)
 app.use(errorWrapper)

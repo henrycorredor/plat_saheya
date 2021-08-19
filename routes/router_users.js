@@ -2,8 +2,8 @@ const express = require('express')
 const router = express.Router()
 
 const boom = require('@hapi/boom')
-const validateData = require('../utils/validationHandler')
-const schemas = require('../utils/schemas/schema_user')
+const validationHandler = require('../utils/validationHandler')
+const { userIdSchema, createUserSchema, editUserSchema } = require('../utils/schemas/schema_user')
 const Services = require('../services/serv_users')
 
 const services = new Services()
@@ -21,7 +21,7 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.post('/', validateData(schemas, 'body'), async (req, res, next) => {
+router.post('/', validationHandler(createUserSchema), async (req, res, next) => {
     try {
         const result = await services.createUser(req.body)
         res.status(201).json({
@@ -34,9 +34,9 @@ router.post('/', validateData(schemas, 'body'), async (req, res, next) => {
     }
 })
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
-        const user = await services.getUser(req.params.id)
+        const user = await services.getUser(req.params.usuario_id)
         if (user.length > 0) {
             res.json({
                 message: 'User finded',
@@ -51,9 +51,9 @@ router.get('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validationHandler(editUserSchema), async (req, res, next) => {
     try {
-        const result = await services.editUser(req.params.id, req.body)
+        const result = await services.editUser(req.params.usuario_id, req.body)
         if (result.affectedRows > 0) {
             res.json({
                 message: 'User edited',
@@ -71,7 +71,7 @@ router.put('/:id', async (req, res, next) => {
     }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
         const data = await services.deleteUser(req.params.id)
         if (data[1].affectedRows > 0) {

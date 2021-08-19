@@ -1,6 +1,6 @@
 const boom = require('@hapi/boom')
 
-module.exports = function (schema, location) {
+module.exports = function (schema, location = 'body') {
     return function (req, res, next) {
         const result = schema.validate(req[location])
         if (result.error) {
