@@ -15,7 +15,7 @@ class LoanServices {
         //si el usuario esta autorizado o no si se puede aplicar el prestamo.
         //de momento se acepta todo.
 
-        const cosigners = data.coodeudores
+        const cosigners = (data.coodeudores) ? data.coodeudores : []
 
         delete data.coodeudores
         const result = await this.db.upsert('prestamos', data)

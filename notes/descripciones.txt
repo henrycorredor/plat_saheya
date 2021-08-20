@@ -1,4 +1,5 @@
 las relaciones de prestamo tienen los siguientes estados:
 1 = en espera de aprobacion
-2 = aprobado
-3 = rechazado
+2 = apobado por coodeudores, en espera de aprobacion de tesoreria
+3 = aprobado
+4 = rechazado

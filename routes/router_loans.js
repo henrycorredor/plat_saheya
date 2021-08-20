@@ -27,7 +27,7 @@ router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
         const result = await services.applyNewLoan(req.body)
         res.status(201).json({
             message: 'Loan setted',
-            statusCode: '200',
+            statusCode: '201',
             data: []
         })
     } catch (error) {
