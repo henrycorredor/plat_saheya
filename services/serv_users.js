@@ -16,7 +16,7 @@ class UserServices {
     }
 
     async getUser(id) {
-        const user = await this.db.getUser(`id = ${id}`)
+        const user = await this.db.getUser(`usuario_id = ${id}`)
         return user
     }
 

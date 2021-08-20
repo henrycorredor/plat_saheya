@@ -16,7 +16,7 @@ const createUserSchema = joi.object({
     capital: joi.number()
 })
 
-const editUserSchema = {
+const editUserSchema = joi.object({
     num_identificacion: joi.number(),
     nombres: joi.string(),
     apellidos: joi.string(),
@@ -24,6 +24,7 @@ const editUserSchema = {
     telefono_ppal: joi.number(),
     rol: joi.number().min(1).max(5),
     email: joi.string().email()
-}
+})
+
 
 module.exports = { userIdSchema, createUserSchema, editUserSchema }

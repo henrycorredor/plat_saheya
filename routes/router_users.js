@@ -27,7 +27,7 @@ router.post('/', validationHandler(createUserSchema), async (req, res, next) => 
         res.status(201).json({
             message: 'User created',
             statusCode: '201',
-            data: [req.body]
+            data: req.body
         })
     } catch (error) {
         next(error)
