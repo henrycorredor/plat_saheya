@@ -156,7 +156,7 @@ CREATE TABLE `usuarios` (
   `fecha_nacimiento` date DEFAULT NULL,
   `num_identificacion` bigint unsigned NOT NULL,
   `fecha_ingreso` date DEFAULT NULL,
-  `telefono_ppal` int DEFAULT NULL,
+  `telefono_ppal` bigint DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `rol` tinyint(1) NOT NULL DEFAULT '1',
   `capital` int NOT NULL DEFAULT '0',

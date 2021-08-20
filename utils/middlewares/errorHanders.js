@@ -1,4 +1,4 @@
-const config = require('../config')
+const config = require('../../config')
 const boom = require('@hapi/boom')
 
 function errorLogger(err, req, res, next) {

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const boom = require('@hapi/boom')
-const validationHandler = require('../utils/validationHandler')
+const validationHandler = require('../utils/middlewares/validationHandler')
 const { userIdSchema, createUserSchema, editUserSchema } = require('../utils/schemas/schema_user')
 const Services = require('../services/serv_users')
 
@@ -73,7 +73,7 @@ router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validation
 
 router.delete('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
-        const data = await services.deleteUser(req.params.id)
+        const data = await services.deleteUser(req.params.usuario_id)
         if (data[1].affectedRows > 0) {
             res.json({
                 message: 'User deleted',

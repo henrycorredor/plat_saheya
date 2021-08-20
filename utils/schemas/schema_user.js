@@ -1,4 +1,3 @@
-const { string } = require('@hapi/joi')
 const joi = require('@hapi/joi')
 
 const userIdSchema = joi.object({
