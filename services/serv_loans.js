@@ -5,37 +5,19 @@ class LoanServices {
         this.db = new MySqlClass()
     }
 
-    async getCosigners(){
+    async getCosigners() {
         const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan.prestamo_id}`, `id_codeudor, monto_avalado`)
         return cosigners
     }
 
     async getAllLoans() {
-        const loans = await this.db.getData('prestamos')
-        
-        Promise.all(
-            loans.map(async loan =>{
+        const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-' ,coo.monto_avalado ORDER BY coo.orden) AS coodeudores
+        FROM prestamos pre
+        JOIN relaciones_coodeudores coo
+        ON pre.prestamo_id = coo.id_prestamo
+        GROUP BY pre.prestamo_id`
 
-            })
-        )
-            
-
-        const data = new Promise((res,rej)=>{
-            const coodeudores = 
-            res(coodeudores)
-        })
-
-
-        loans.forEach(loan =>{
-            loan.coodeudores = data
-            data.push()
-        })
-        const promises = await loans.map(async function (loan) {
-            console.log('en proceso: ', loan)
-            return loan
-        }.bind(this))
-        Promise.all
-        console.log('objeto devuelto: ',data)
+        const data = this.db.doQuery(query)
         return data
     }
 
@@ -43,7 +25,6 @@ class LoanServices {
         //aca deberia ir todo el proceso de verifiacion
         //si el usuario esta autorizado o no si se puede aplicar el prestamo.
         //de momento se acepta todo.
-
         const cosigners = (data.coodeudores) ? data.coodeudores : []
 
         delete data.coodeudores

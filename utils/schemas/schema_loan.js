@@ -8,7 +8,7 @@ const applyLoanSchema = joi.object({
     coodeudores: joi.array().items(joi.object({
         id_codeudor: joi.number().required(),
         monto_avalado: joi.number().required()
-    }))
+    })).required()
 })
 
 module.exports = applyLoanSchema
