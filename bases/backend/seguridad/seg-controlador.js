@@ -86,10 +86,11 @@ function compararClave(pet, res, siguiente) {
       }
     })
     .catch((err) => {
-      throw error(
-        `Error en el servidor, por favor reportele a Alejo Corredor lo siguiente: ${err}`,
-        503
-      )
+      respuestas.error(res, `Error en el servidor, por favor reportele a Alejo Corredor lo siguiente: ${err}`, 503)
+      // throw error(
+      //   `Error en el servidor, por favor reportele a Alejo Corredor lo siguiente: ${err}`,
+      //   503
+      // )
     })
 }
 

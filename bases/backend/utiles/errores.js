@@ -3,5 +3,6 @@ module.exports = function (mensaje, codigo) {
     if (codigo) {
         e.statusCode = codigo;
     }
+    console.log('esto se ejecuta')
     return e;
 }
