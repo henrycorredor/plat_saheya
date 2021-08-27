@@ -5,12 +5,37 @@ class LoanServices {
         this.db = new MySqlClass()
     }
 
+    async getCosigners(){
+        const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan.prestamo_id}`, `id_codeudor, monto_avalado`)
+        return cosigners
+    }
+
     async getAllLoans() {
         const loans = await this.db.getData('prestamos')
-        const data = await loans.map(async function (loan) {
-            let data = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan.prestamo_id}`, `deudor_id, monto`)
-            loan.push({ coodeudores: data })
+        
+        Promise.all(
+            loans.map(async loan =>{
+
+            })
+        )
+            
+
+        const data = new Promise((res,rej)=>{
+            const coodeudores = 
+            res(coodeudores)
+        })
+
+
+        loans.forEach(loan =>{
+            loan.coodeudores = data
+            data.push()
+        })
+        const promises = await loans.map(async function (loan) {
+            console.log('en proceso: ', loan)
+            return loan
         }.bind(this))
+        Promise.all
+        console.log('objeto devuelto: ',data)
         return data
     }
 
