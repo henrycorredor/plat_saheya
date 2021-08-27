@@ -6,7 +6,11 @@ class LoanServices {
     }
 
     async getAllLoans() {
-        const data = await this.db.getData('prestamos')
+        const loans = await this.db.getData('prestamos')
+        const data = await loans.map(async function (loan) {
+            let data = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan.prestamo_id}`, `deudor_id, monto`)
+            loan.push({ coodeudores: data })
+        }.bind(this))
         return data
     }
 
