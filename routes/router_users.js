@@ -37,7 +37,8 @@ router.post('/', validationHandler(createUserSchema), async (req, res, next) => 
 router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
         const user = await services.getUser(req.params.usuario_id)
-        if (user.length > 0) {
+        console.log(user)
+        if (user) {
             res.json({
                 message: 'User finded',
                 statusCode: '200',

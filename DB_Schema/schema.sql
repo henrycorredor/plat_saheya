@@ -61,6 +61,7 @@ CREATE TABLE `prestamos` (
   `estado` tinyint(1) NOT NULL DEFAULT '1',
   `monto` int DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ultima_actualizacion` DATE NULL DEFAULT NULL,
   `pagado` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`prestamo_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -79,7 +80,7 @@ CREATE TABLE `relaciones_coodeudores` (
   `id_codeudor` int unsigned NOT NULL,
   `monto_avalado` int NOT NULL,
   `orden` int NOT NULL DEFAULT '1',
-  `aprobado` tinyint NOT NULL DEFAULT '2',
+  `aprobado` tinyint NOT NULL DEFAULT '1',
   `fecha_aprobacion` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id_relacion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

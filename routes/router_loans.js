@@ -3,7 +3,7 @@ const router = express.Router()
 const boom = require('@hapi/boom')
 
 const validationHandler = require('../utils/middlewares/validationHandler')
-const applyLoanSchema = require('../utils/schemas/schema_loan')
+const { applyLoanSchema, cosignerUpdateRels } = require('../utils/schemas/schema_loan')
 
 const Services = require('../services/serv_loans')
 
@@ -24,7 +24,7 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
     try {
-        const result = await services.applyNewLoan(req.body)
+        await services.applyNewLoan(req.body)
         res.status(201).json({
             message: 'Loan setted',
             statusCode: '201',
@@ -38,11 +38,11 @@ router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
 router.get('/:loanId', async (req, res, next) => {
     try {
         const result = await services.getLoan(req.params.loanId)
-        if (result.length > 0) {
+        if (result) {
             res.status(200).json({
                 message: `Loan id ${req.params.loanId}`,
                 statusCode: '200',
-                data: result
+                data: result[0]
             })
         } else {
             next(boom.notFound('Inexistent resource'))
@@ -52,10 +52,21 @@ router.get('/:loanId', async (req, res, next) => {
     }
 })
 
-router.put('/:loandId', (req, res, next) => {
-    res.json({
-        message: `Updating loan ID ${req.params.loandId}`
-    })
+router.put('/:loandId', validationHandler(cosignerUpdateRels, 'body'), async (req, res, next) => {
+    try {
+        const result = await services.cosignerUpdateLoan(req.params.loandId, req.body.user_id, req.body.new_status)
+        if (result.status === 0) {
+            next(boom.notFound('Inexistent resource'))
+        } else {
+            res.status(200).json({
+                message: result.msg,
+                statusCode: '200',
+                data: result
+            })
+        }
+    } catch (error) {
+        next(error)
+    }
 })
 
 

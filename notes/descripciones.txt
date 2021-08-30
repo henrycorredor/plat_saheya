@@ -1,5 +1,20 @@
-las relaciones de prestamo tienen los siguientes estados:
-1 = en espera de aprobacion
-2 = apobado por coodeudores, en espera de aprobacion de tesoreria
-3 = aprobado
-4 = rechazado
+Estados de los préstamos:
+
+1 - solicitado - esperando aprobación
+2 - rechazado
+3 - coodeudores aprobados, en espera de aprobación de tesoreria
+4 - aprobado, esperando desembolso
+5 - desembolso confirmado una parte
+6 - desembolso confirmado doble, préstamo en proceso
+7 - prestamo pagado
+8 - congelado
+
+
+
+Estados de coorelaciones de coodeudores:
+
+1 - en espera de aprobacion
+2 - rechazado
+3 - apobado
+
+UPDATE `prestamos` SET `estado`= 1

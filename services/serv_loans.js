@@ -1,19 +1,16 @@
 const MySqlClass = require('../lib/mysql')
+const moment = require('moment')
+
 
 class LoanServices {
     constructor() {
         this.db = new MySqlClass()
     }
 
-    async getCosigners() {
-        const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan.prestamo_id}`, `id_codeudor, monto_avalado`)
-        return cosigners
-    }
-
     async getAllLoans() {
         const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-' ,coo.monto_avalado ORDER BY coo.orden) AS coodeudores
         FROM prestamos pre
-        JOIN relaciones_coodeudores coo
+        LEFT JOIN relaciones_coodeudores coo
         ON pre.prestamo_id = coo.id_prestamo
         GROUP BY pre.prestamo_id`
 
@@ -45,8 +42,47 @@ class LoanServices {
     }
 
     async getLoan(id) {
-        const data = await this.db.getData('prestamos', `prestamo_id = ${id}`)
-        return data
+        const loan = await this.db.getData('prestamos', `prestamo_id = ${id}`)
+        if (loan) {
+            const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${id}`)
+            loan[0].coodeudores = cosigners
+        }
+        return loan
+    }
+
+    async cosignerUpdateLoan(loan_id, user_id, new_status) {
+        //here will be a validation
+        //operation able only if the validated user id is the same as the provided user_id
+
+        /*
+        approved:
+            only mine/one left
+                set loan loan to 3
+            set rel status = 3
+        no approved:
+            set rel status = 2
+            set loan status = 2 
+        */
+        let msg
+        const currentTimeStamp = moment().format("YYYY-MM-DD hh:mm:ss")
+        const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} AND aprobado = 1 AND id_codeudor = ${user_id}`, 'COUNT(2) AS res')
+        if (relationships[0].res === 0) {
+            msg = { status: 0, msg: "inexistent resources" }
+        } else {
+            if (new_status) {
+                const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} AND aprobado = 1`, 'COUNT(2) AS res')
+                if (cosigners[0].res === 1) {
+                    await this.db.upsert('prestamos', { estado: 3, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                }
+                await this.db.upsert('relaciones_coodeudores', { aprobado: 3, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id}`)
+                msg = { status: 3, msg: "setted aproved succesfuly" }
+            } else {
+                await this.db.upsert('prestamos', { estado: 2, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                await this.db.upsert('relaciones_coodeudores', { aprobado: 2, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id}`)
+                msg = { status: 2, msg: "setted rejected succesfuly" }
+            }
+        }
+        return msg
     }
 }
 
