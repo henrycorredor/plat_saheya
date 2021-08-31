@@ -8,7 +8,7 @@ class LoanServices {
     }
 
     async getAllLoans() {
-        const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-' ,coo.monto_avalado ORDER BY coo.orden) AS coodeudores
+        const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-', coo.monto_avalado, '-', coo.aprobado ORDER BY coo.orden) AS coodeudores
         FROM prestamos pre
         LEFT JOIN relaciones_coodeudores coo
         ON pre.prestamo_id = coo.id_prestamo
@@ -44,13 +44,13 @@ class LoanServices {
     async getLoan(id) {
         const loan = await this.db.getData('prestamos', `prestamo_id = ${id}`)
         if (loan) {
-            const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${id}`)
+            const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${id}`, `id_codeudor, monto_avalado, aprobado`)
             loan[0].coodeudores = cosigners
         }
         return loan
     }
 
-    async cosignerUpdateLoan(loan_id, user_id, new_status) {
+    async updateLoan(loan_id, user_id, new_status, action) {
         //here will be a validation
         //operation able only if the validated user id is the same as the provided user_id
 
@@ -64,23 +64,35 @@ class LoanServices {
             set loan status = 2 
         */
         let msg
-        const currentTimeStamp = moment().format("YYYY-MM-DD hh:mm:ss")
-        const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} AND aprobado = 1 AND id_codeudor = ${user_id}`, 'COUNT(2) AS res')
-        if (relationships[0].res === 0) {
-            msg = { status: 0, msg: "inexistent resources" }
-        } else {
-            if (new_status) {
-                const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} AND aprobado = 1`, 'COUNT(2) AS res')
-                if (cosigners[0].res === 1) {
-                    await this.db.upsert('prestamos', { estado: 3, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+        switch (action) {
+            case 'cosigner_approval':
+                //common user
+                const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} AND aprobado = 1`,)
+                if (!relationships) {
+                    msg = { status: 0, msg: "inexistent resources" }
+                } else {
+                    const my_rel = relationships.filter(rel => rel.id_codeudor === user_id && rel.aprobado === 1)
+                    if (my_rel.length === 0) {
+                        msg = { status: 0, msg: "inexistent resources" }
+                    } else {
+                        const currentTimeStamp = moment().format("YYYY-MM-DD hh:mm:ss")
+                        const newStatus = (new_status) ? 3 : 2
+                        if (relationships.length === 1) {
+                            await this.db.upsert('prestamos', { estado: newStatus, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                        }
+                        await this.db.upsert('relaciones_coodeudores', { aprobado: newStatus, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id}`)
+                        msg = (new_status) ? { status: 3, msg: "setted aproved succesfuly" } : { status: 2, msg: "setted rejected succesfuly" }
+                    }
                 }
-                await this.db.upsert('relaciones_coodeudores', { aprobado: 3, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id}`)
-                msg = { status: 3, msg: "setted aproved succesfuly" }
-            } else {
-                await this.db.upsert('prestamos', { estado: 2, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
-                await this.db.upsert('relaciones_coodeudores', { aprobado: 2, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id}`)
-                msg = { status: 2, msg: "setted rejected succesfuly" }
-            }
+                break;
+
+            case 'treasury_approval':
+                
+                //const loan = await this.db.getData('prestamos', `prestamo_id = ${loan_id}`)
+
+                break;
+            default:
+                msg = { status: 400, msg: "inexistent resources" }
         }
         return msg
     }

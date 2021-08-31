@@ -13,6 +13,7 @@ const applyLoanSchema = joi.object({
 
 const cosignerUpdateRels = joi.object({
     user_id: joi.number().required(),
+    action: joi.string().required(),
     new_status: joi.boolean().required()
 })
 

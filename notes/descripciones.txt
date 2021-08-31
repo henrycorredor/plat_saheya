@@ -17,4 +17,12 @@ Estados de coorelaciones de coodeudores:
 2 - rechazado
 3 - apobado
 
-UPDATE `prestamos` SET `estado`= 1
+
+
+Roles de usuarios
+
+1 - Normal
+2 - Super Usuario
+3 - Tesorero
+4 - Presidente
+5 - Fiscal

@@ -54,9 +54,12 @@ router.get('/:loanId', async (req, res, next) => {
 
 router.put('/:loandId', validationHandler(cosignerUpdateRels, 'body'), async (req, res, next) => {
     try {
-        const result = await services.cosignerUpdateLoan(req.params.loandId, req.body.user_id, req.body.new_status)
+        const { user_id, new_status, action } = req.body
+        const result = await services.updateLoan(req.params.loandId, user_id, new_status, action)
         if (result.status === 0) {
             next(boom.notFound('Inexistent resource'))
+        } else if (result.status === 400) {
+            next(boom.badRequest('invalid or inexistent action'))
         } else {
             res.status(200).json({
                 message: result.msg,
