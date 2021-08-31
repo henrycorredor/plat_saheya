@@ -24,11 +24,13 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
     try {
-        await services.applyNewLoan(req.body)
+        const result = await services.applyNewLoan(req.body)
         res.status(201).json({
             message: 'Loan setted',
             statusCode: '201',
-            data: []
+            data: {
+                new_loan_id: result.insertId
+            }
         })
     } catch (error) {
         next(error)

@@ -152,6 +152,36 @@
         }
       }
     },
+    "/user/{userId}/loan": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "summary": "get one users loans",
+        "description": "List all loans under the actual user's name",
+        "operationId": "getUserLoans",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User's loans",
+            "schema": {
+              "$ref": "#/definitions/Loan"
+            }
+          }
+        }
+      }
+    },
     "/loan": {
       "get": {
         "tags": [
@@ -226,9 +256,9 @@
         "tags": [
           "loans"
         ],
-        "summary": "Aprove - reject co-signed loans.",
+        "summary": "Cosigners and Treasure aprove - reject - confirm loans.",
         "description": "Use this method to approve or reject co-signed loans. Users can only modify loans under the respective account.",
-        "operationId": "approveLoanCoSing",
+        "operationId": "updateLoan",
         "parameters": [
           {
             "name": "loanId",
@@ -241,13 +271,18 @@
           {
             "name": "body",
             "in": "body",
-            "description": "contains data to make the operation",
+            "description": "actions `cosigner_approval` , `treasury_approval` , `conf_one_side_disbursement` or `conf_double_side_disbursement`",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Loan"
+              "$ref": "#/definitions/UpdateLoan"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Loan modified."
+          }
+        }
       }
     }
   },
@@ -307,6 +342,21 @@
         "pagado": {
           "type": "integer",
           "format": "int64"
+        }
+      }
+    },
+    "UpdateLoan": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "action": {
+          "type": "string"
+        },
+        "new_status": {
+          "type": "boolean"
         }
       }
     }

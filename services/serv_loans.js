@@ -25,6 +25,7 @@ class LoanServices {
         const cosigners = (data.coodeudores) ? data.coodeudores : []
 
         delete data.coodeudores
+        if (cosigners.length === 0) { data.estado = 3 }
         const result = await this.db.upsert('prestamos', data)
 
         if (cosigners.length > 0) {
@@ -37,7 +38,6 @@ class LoanServices {
                 })
             })
         }
-
         return result
     }
 
@@ -54,16 +54,8 @@ class LoanServices {
         //here will be a validation
         //operation able only if the validated user id is the same as the provided user_id
 
-        /*
-        approved:
-            only mine/one left
-                set loan loan to 3
-            set rel status = 3
-        no approved:
-            set rel status = 2
-            set loan status = 2 
-        */
         let msg
+        const currentTimeStamp = moment().format("YYYY-MM-DD hh:mm:ss")
         switch (action) {
             case 'cosigner_approval':
                 //common user
@@ -75,7 +67,6 @@ class LoanServices {
                     if (my_rel.length === 0) {
                         msg = { status: 0, msg: "inexistent resources" }
                     } else {
-                        const currentTimeStamp = moment().format("YYYY-MM-DD hh:mm:ss")
                         const newStatus = (new_status) ? 3 : 2
                         if (relationships.length === 1) {
                             await this.db.upsert('prestamos', { estado: newStatus, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
@@ -87,10 +78,21 @@ class LoanServices {
                 break;
 
             case 'treasury_approval':
-                
-                //const loan = await this.db.getData('prestamos', `prestamo_id = ${loan_id}`)
-
+                const status = (new_status) ? 4 : 2
+                const treAprovResult = await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id} AND estado = 3`)
+                msg = (treAprovResult.affectedRows === 0) ? { status: 0, msg: "inexistent resources" } : { status: 4, msg: "setted aproved succesfuly" }
                 break;
+
+            case 'conf_one_side_disbursement':
+                const OneSideConfRes = await this.db.upsert('prestamos', { estado: 5, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id} AND estado = 4`)
+                msg = (OneSideConfRes.affectedRows === 0) ? { status: 0, msg: "inexistent resources" } : { status: 5, msg: "one side disbursement succesfuly confirmed" }
+                break;
+
+            case 'conf_double_side_disbursement':
+                const doubleSideConf = await this.db.upsert('prestamos', { estado: 6, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id} AND estado = 5`)
+                msg = (doubleSideConf.affectedRows === 0) ? { status: 0, msg: "inexistent resources" } : { status: 6, msg: "one side disbursement succesfuly confirmed" }
+                break;
+
             default:
                 msg = { status: 400, msg: "inexistent resources" }
         }
