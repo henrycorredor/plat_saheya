@@ -2,11 +2,11 @@ const express = require('express')
 const app = express()
 const config = require('./config')
 
-const { errorHandler, errorLogger, errorWrapper } = require('./utils/middlewares/errorHanders')
+const { errorHandler, errorLogger, errorWrapper } = require('./utils/middlewares/error_handers')
 
 const routes = require('./routes')
 
-const notFoundHandler = require('./utils/middlewares/notFoundHandler')
+const notFoundHandler = require('./utils/middlewares/not_found_handler')
 
 app.use(express.json())
 

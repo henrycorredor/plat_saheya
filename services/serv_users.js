@@ -30,6 +30,11 @@ class UserServices {
         const result = await this.db.delete('usuarios', `usuario_id = ${id}`)
         return [userInfo, result]
     }
+
+    async getUserLoans(id) {
+        const data = await this.db.getData('prestamos', `deudor_id = ${id}`)
+        return data
+    }
 }
 
 module.exports = UserServices

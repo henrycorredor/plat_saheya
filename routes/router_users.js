@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const boom = require('@hapi/boom')
-const validationHandler = require('../utils/middlewares/validationHandler')
+const validationHandler = require('../utils/middlewares/validation_handler')
 const { userIdSchema, createUserSchema, editUserSchema } = require('../utils/schemas/schema_user')
 const Services = require('../services/serv_users')
 
@@ -37,7 +37,6 @@ router.post('/', validationHandler(createUserSchema), async (req, res, next) => 
 router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
         const user = await services.getUser(req.params.usuario_id)
-        console.log(user)
         if (user) {
             res.json({
                 message: 'User finded',
@@ -63,6 +62,23 @@ router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validation
                     id: req.params.id,
                     ...req.body
                 }]
+            })
+        } else {
+            next(boom.notFound('Inexistent resource'))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get('/:usuario_id/loan', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
+    try {
+        const data = await services.getUserLoans(req.params.usuario_id)
+        if (data) {
+            res.json({
+                message: `User ${req.params.usuario_id} loans`,
+                statusCode: '200',
+                data: data
             })
         } else {
             next(boom.notFound('Inexistent resource'))
