@@ -3,11 +3,12 @@ Estados de los préstamos:
 1 - solicitado - esperando aprobación
 2 - rechazado
 3 - coodeudores aprobados, en espera de aprobación de tesoreria
-4 - aprobado, esperando desembolso
-5 - desembolso confirmado una parte
-6 - desembolso confirmado doble, préstamo en proceso
-7 - prestamo pagado
-8 - congelado
+4 - aprobado, esperando documentos de soporte
+5 - aprobado, esperando desembolso
+6 - desembolso confirmado una parte
+7 - desembolso confirmado doble, préstamo en proceso
+8 - prestamo pagado
+9 - congelado
 
 
 
