@@ -1,4 +1,11 @@
 const MySqlClass = require('../lib/mysql')
+const loanValidator = require('../lib/validator_lib')
+const {
+    extraExtraordinario,
+    ordinarioCuotaFija,
+    ordinarioSinCuotaFija,
+    extraordinario
+} = require('../utils/schemas/schemas_loan_conditions')
 const moment = require('moment')
 
 
@@ -19,7 +26,7 @@ class LoanServices {
     }
 
     async applyNewLoan(data) {
-        //aca deberia ir todo el proceso de verifiacion
+
         //si el usuario esta autorizado o no si se puede aplicar el prestamo.
         //de momento se acepta todo.
         const cosigners = (data.coodeudores) ? data.coodeudores : []

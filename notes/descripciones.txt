@@ -1,3 +1,12 @@
+Tipos de préstamos:
+
+1 - Ordinario con cuota fija
+2 - Prdinario sin cuota fija
+3 - Extraordinario
+4 - Extra - Extraordinario
+
+
+
 Estados de los préstamos:
 
 1 - solicitado - esperando aprobación

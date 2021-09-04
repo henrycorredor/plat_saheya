@@ -47,19 +47,19 @@ Flags:
 */
 
 const ordinarioCuotaFija = {
-    maxAmount: ['USER_FREE_CAPITAL', 90],
-    term: 60,
-    adminPermission: [3],
-    monthCuote: 'MONTH_FIXED_CUOTE',
-    interest: 0.8
+        maxAmount: ['USER_FREE_CAPITAL', 90],
+        term: 60,
+        adminPermission: [3],
+        monthCuote: 'MONTH_FIXED_CUOTE',
+        interest: 0.8
 }
 
 const ordinarioSinCuotaFija = {
-    maxAmount: ['USER_FREE_CAPITAL', 90],
-    term: 12,
-    adminPermission: [3],
-    monthCuote: 'ONLY_MONTHLY_INTEREST',
-    interest: 0.8
+        maxAmount: ['USER_FREE_CAPITAL', 90],
+        term: 12,
+        adminPermission: [3],
+        monthCuote: 'ONLY_MONTHLY_INTEREST',
+        interest: 0.8
 }
 
 /*
@@ -73,12 +73,15 @@ const ordinarioSinCuotaFija = {
 */
 
 const extraordinario = {
-    maxAmount: ['USER_FREE_CAPITAL', 90],
-    term: 60,
-    furtherProcess: ['Necesario adjuntar pagaré e instructivo'],
-    adminPermission: [3, 4],
-    interest: 0.8,
-    monthCuote: 'MONTH_FIXED_CUOTE'
+        maxAmount: ['USER_FREE_CAPITAL', 90],
+        term: 60,
+        adminPermission: [3, 4],
+        interest: 0.8,
+        monthCuote: 'MONTH_FIXED_CUOTE',
+        furtherProcess: [{
+                type: 'file',
+                description: 'Necesario adjuntar pagaré e instructivo'
+        }]
 }
 
 /*
@@ -97,9 +100,23 @@ const extraordinario = {
 */
 
 const extraExtraordinario = {
-    maxAmount: ['USER_FREE_CAPITAL', 90],
-    term: 60,
-    adminPermission: [3, 4, 5],
-    interest: 0.8,
-    furtherProcess: ['pagaré e instructivo firmado por el socio y el coodeudor', 'este prestamo está sometido al analisis y aprobación de la junta directiva.']
+        term: 60,
+        maxAmount: ['USER_FREE_CAPITAL', 90],
+        adminPermission: [3, 4, 5],
+        interest: 0.8,
+        furtherProcess: {
+                requeriment: [{
+                        type: 'file',
+                        description: 'Pagaré e Instructivo firmado por el socio y el coodeudor'
+                },
+                {
+                        type: 'appoval',
+                        description: 'Aprovación de junta directiva'
+                }]
+
+        }
 }
+
+
+
+module.exports = [extraExtraordinario, ordinarioCuotaFija, ordinarioSinCuotaFija, extraordinario]

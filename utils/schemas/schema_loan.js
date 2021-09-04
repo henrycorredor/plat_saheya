@@ -5,6 +5,7 @@ const applyLoanSchema = joi.object({
     num_cuotas: joi.string().required(),
     deudor_id: joi.number().required(),
     monto: joi.number().required(),
+    tipo: joi.number().required(),
     coodeudores: joi.array().items(joi.object({
         id_codeudor: joi.number().required(),
         monto_avalado: joi.number().required()
