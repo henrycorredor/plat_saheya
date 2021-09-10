@@ -25,9 +25,25 @@ class LoanServices {
     }
 
     async applyNewLoan(data) {
+        let result
+        switch (data.tipo) {
+            case '1':
+                result = await ordinarioCuotaFija.validator(data)
+                break
+            case '2':
+                result = await ordinarioSinCuotaFija.validator(data)
+                break
+            case '3':
+                result = await extraordinario.validator(data)
+                break
+            case '4':
+                result = await extraExtraordinario.validator(data)
+                break
+            default:
+                throw new Error('Wrong option')
+        }
 
-        //si el usuario esta autorizado o no si se puede aplicar el prestamo.
-        //de momento se acepta todo.
+        
 
         /*
         const cosigners = (data.coodeudores) ? data.coodeudores : []
@@ -46,9 +62,8 @@ class LoanServices {
                 })
             })
         }*/
-        const resultado = ordinarioCuotaFija.validator(data)
         //return result
-        return resultado
+        return result
     }
 
     async getLoan(id) {

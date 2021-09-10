@@ -33,7 +33,7 @@ Flags:
         ONLY_MONTHLY_INTEREST
 */
 
-const validator = require('../../lib/loan_builder')
+const validator = require('../../lib/loan_handler')
 
 /*
 - Ordinario cuota fija(PO)
@@ -50,20 +50,31 @@ const validator = require('../../lib/loan_builder')
 
 const ordinarioCuotaFija = {
         loanCode: 1,
-        maxAmount: ['USER_FREE_CAPITAL', 90],
-        term: 60,
-        adminPermission: [3],
-        cuoteType: 'MONTH_FIXED_CUOTE',
-        interest: 0.8
+        filters: {
+                maxAmount: ['USER_FREE_CAPITAL', 90],
+                term: 60
+        },
+        warmings: {},
+        features: {
+                adminPermission: [3],
+                cuoteType: 'MONTH_FIXED_CUOTE',
+                interest: 0.8
+        }
 }
 
 const ordinarioSinCuotaFija = {
         loanCode: 2,
-        maxAmount: ['USER_FREE_CAPITAL', 90],
-        term: 12,
-        adminPermission: [3],
-        cuoteType: 'ONLY_MONTHLY_INTEREST',
-        interest: 0.8
+        filters: {
+                term: 12,
+                maxAmount: ['USER_FREE_CAPITAL', 90]
+        },
+        warmings: {},
+        features: {
+                adminPermission: [3],
+                cuoteType: 'ONLY_MONTHLY_INTEREST',
+                interest: 0.8
+        }
+
 }
 
 /*
@@ -78,12 +89,19 @@ const ordinarioSinCuotaFija = {
 
 const extraordinario = {
         loanCode: 3,
-        maxAmount: ['USER_FREE_CAPITAL', 90],
-        term: 60,
-        adminPermission: [3, 4],
-        interest: 0.8,
-        cuoteType: 'MONTH_FIXED_CUOTE',
-        postApplymentDocs: ['Necesario adjuntar pagaré e instructivo']
+        filters: {
+                maxAmount: ['USER_FREE_CAPITAL', 90],
+                term: 60,
+                actualLoans: 1
+        },
+        warmings: {
+                postApplymentDocs: ['Necesario adjuntar pagaré e instructivo']
+        },
+        features: {
+                adminPermission: [3, 4],
+                interest: 0.8,
+                cuoteType: 'MONTH_FIXED_CUOTE',
+        }
 }
 
 /*
@@ -103,13 +121,20 @@ const extraordinario = {
 
 const extraExtraordinario = {
         loanCode: 4,
-        term: 60,
-        maxAmount: ['USER_FREE_CAPITAL', 90],
-        adminPermission: [3, 4, 5],
-        interest: 0.8,
-        cuoteType: 'MONTH_FIXED_CUOTE',
-        accountAgeing: 2,
-        postApplymentDocs: ['Pagaré e Instructivo firmado por el socio y el coodeudor']
+        filters: {
+                term: 60,
+                maxAmount: ['TOTAL_COMPANY_CASH', 90],
+                accountAgeing: 2,
+                actualLoans: 0
+        },
+        warmings: {
+                postApplymentDocs: ['Pagaré e Instructivo firmado por el socio y el coodeudor']
+        },
+        features: {
+                adminPermission: [3, 4, 5],
+                interest: 0.8,
+                cuoteType: 'MONTH_FIXED_CUOTE',
+        }
 }
 
 const loanTypes = [extraExtraordinario, ordinarioCuotaFija, ordinarioSinCuotaFija, extraordinario]

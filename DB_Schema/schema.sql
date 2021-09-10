@@ -23,11 +23,13 @@ DROP TABLE IF EXISTS `capital`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `capital` (
+  `mov_id` int unsigned NOT NULL AUTO_INCREMENT,
   `total_actual` int unsigned NOT NULL,
   `total_anterior` int unsigned NOT NULL,
   `motivo_movimiento` tinyint(1) NOT NULL,
   `transaccion_id` int unsigned NOT NULL,
-  `monto` int NOT NULL
+  `monto` int NOT NULL,
+  PRIMARY KEY (`mov_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

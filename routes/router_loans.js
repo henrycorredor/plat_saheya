@@ -28,11 +28,8 @@ router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
         res.status(201).json({
             message: 'Loan setted',
             statusCode: '201',
-            data: {
-                new_loan_id: result.insertId
-            }
+            data: result
         })
-        console.log('miau')
     } catch (error) {
         next(error)
     }
