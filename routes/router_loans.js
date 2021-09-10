@@ -32,6 +32,7 @@ router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
                 new_loan_id: result.insertId
             }
         })
+        console.log('miau')
     } catch (error) {
         next(error)
     }

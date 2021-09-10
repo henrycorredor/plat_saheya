@@ -12,7 +12,7 @@ system conditions:
     actualLoans: NUMERO de prestamos vigentes a la fecha
             -> 0 pasa 1 no aprovado
 
-    furtherProcess: [CADENA explicando los requisitos posteriores]
+    postApplymentDocs: [CADENA explicando los requisitos posteriores]
             -> 2 aviso
     
     adminPermission: [codigos de roles]
@@ -33,6 +33,8 @@ Flags:
         ONLY_MONTHLY_INTEREST
 */
 
+const validator = require('../../lib/loan_builder')
+
 /*
 - Ordinario cuota fija(PO)
     - 90% del capital libre
@@ -47,18 +49,20 @@ Flags:
 */
 
 const ordinarioCuotaFija = {
+        loanCode: 1,
         maxAmount: ['USER_FREE_CAPITAL', 90],
         term: 60,
         adminPermission: [3],
-        monthCuote: 'MONTH_FIXED_CUOTE',
+        cuoteType: 'MONTH_FIXED_CUOTE',
         interest: 0.8
 }
 
 const ordinarioSinCuotaFija = {
+        loanCode: 2,
         maxAmount: ['USER_FREE_CAPITAL', 90],
         term: 12,
         adminPermission: [3],
-        monthCuote: 'ONLY_MONTHLY_INTEREST',
+        cuoteType: 'ONLY_MONTHLY_INTEREST',
         interest: 0.8
 }
 
@@ -73,15 +77,13 @@ const ordinarioSinCuotaFija = {
 */
 
 const extraordinario = {
+        loanCode: 3,
         maxAmount: ['USER_FREE_CAPITAL', 90],
         term: 60,
         adminPermission: [3, 4],
         interest: 0.8,
-        monthCuote: 'MONTH_FIXED_CUOTE',
-        furtherProcess: [{
-                type: 'file',
-                description: 'Necesario adjuntar pagaré e instructivo'
-        }]
+        cuoteType: 'MONTH_FIXED_CUOTE',
+        postApplymentDocs: ['Necesario adjuntar pagaré e instructivo']
 }
 
 /*
@@ -100,23 +102,20 @@ const extraordinario = {
 */
 
 const extraExtraordinario = {
+        loanCode: 4,
         term: 60,
         maxAmount: ['USER_FREE_CAPITAL', 90],
         adminPermission: [3, 4, 5],
         interest: 0.8,
-        furtherProcess: {
-                requeriment: [{
-                        type: 'file',
-                        description: 'Pagaré e Instructivo firmado por el socio y el coodeudor'
-                },
-                {
-                        type: 'appoval',
-                        description: 'Aprovación de junta directiva'
-                }]
-
-        }
+        cuoteType: 'MONTH_FIXED_CUOTE',
+        accountAgeing: 2,
+        postApplymentDocs: ['Pagaré e Instructivo firmado por el socio y el coodeudor']
 }
 
+const loanTypes = [extraExtraordinario, ordinarioCuotaFija, ordinarioSinCuotaFija, extraordinario]
 
+loanTypes.forEach(loanType => {
+        Object.assign(loanType, validator)
+})
 
-module.exports = [extraExtraordinario, ordinarioCuotaFija, ordinarioSinCuotaFija, extraordinario]
+module.exports = loanTypes
