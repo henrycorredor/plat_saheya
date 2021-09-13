@@ -27,23 +27,23 @@ class LoanServices {
     async applyNewLoan(data) {
         let result
         switch (data.tipo) {
-            case '1':
+            case 1:
                 result = await ordinarioCuotaFija.validator(data)
                 break
-            case '2':
+            case 2:
                 result = await ordinarioSinCuotaFija.validator(data)
                 break
-            case '3':
+            case 3:
                 result = await extraordinario.validator(data)
                 break
-            case '4':
+            case 4:
                 result = await extraExtraordinario.validator(data)
                 break
             default:
                 throw new Error('Wrong option')
         }
 
-        
+
 
         /*
         const cosigners = (data.coodeudores) ? data.coodeudores : []

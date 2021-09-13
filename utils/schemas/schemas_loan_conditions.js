@@ -51,8 +51,9 @@ const validator = require('../../lib/loan_handler')
 const ordinarioCuotaFija = {
         loanCode: 1,
         filters: {
-                maxAmount: ['USER_FREE_CAPITAL', 90],
-                term: 60
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
+                term: 60,
+                needCosigners: false
         },
         warmings: {},
         features: {
@@ -66,7 +67,8 @@ const ordinarioSinCuotaFija = {
         loanCode: 2,
         filters: {
                 term: 12,
-                maxAmount: ['USER_FREE_CAPITAL', 90]
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
+                needCosigners: false
         },
         warmings: {},
         features: {
@@ -90,9 +92,11 @@ const ordinarioSinCuotaFija = {
 const extraordinario = {
         loanCode: 3,
         filters: {
-                maxAmount: ['USER_FREE_CAPITAL', 90],
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
+                cosignersMaxAmount: ['USER_FREE_CAPITAL', 90],
                 term: 60,
-                actualLoans: 1
+                actualLoans: 1,
+                needCosigners: true
         },
         warmings: {
                 postApplymentDocs: ['Necesario adjuntar pagaré e instructivo']
@@ -122,8 +126,8 @@ const extraordinario = {
 const extraExtraordinario = {
         loanCode: 4,
         filters: {
+                selfDebtMaxAmount: ['TOTAL_COMPANY_CASH', 90],
                 term: 60,
-                maxAmount: ['TOTAL_COMPANY_CASH', 90],
                 accountAgeing: 2,
                 actualLoans: 0
         },
