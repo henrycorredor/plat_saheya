@@ -12,13 +12,12 @@ const applyLoanSchema = joi.object({
     })).required()
 })
 
-const cosignerUpdateRels = joi.object({
-    user_id: joi.number().required(),
-    action: joi.string().required(),
-    new_status: joi.boolean().required()
+const updateLoanStatus = joi.object({
+    rol: joi.number().required(),
+    new_status: joi.number().required()
 })
 
-module.exports = { applyLoanSchema, cosignerUpdateRels }
+module.exports = { applyLoanSchema, updateLoanStatus }
 
 /*
 prestamo_id    | int unsigned | NO   | PRI | NULL              | auto_increment    |

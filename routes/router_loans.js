@@ -3,7 +3,7 @@ const router = express.Router()
 const boom = require('@hapi/boom')
 
 const validationHandler = require('../utils/middlewares/validation_handler')
-const { applyLoanSchema, cosignerUpdateRels } = require('../utils/schemas/schema_loan')
+const { applyLoanSchema, updateLoanStatus } = require('../utils/schemas/schema_loan')
 
 const Services = require('../services/serv_loans')
 
@@ -52,21 +52,21 @@ router.get('/:loanId', async (req, res, next) => {
     }
 })
 
-router.put('/:loandId', validationHandler(cosignerUpdateRels, 'body'), async (req, res, next) => {
+router.put('/:loandId', validationHandler(updateLoanStatus, 'body'), async (req, res, next) => {
     try {
-        const { user_id, new_status, action } = req.body
-        const result = await services.updateLoan(req.params.loandId, user_id, new_status, action)
-        if (result.status === 0) {
-            next(boom.notFound('Inexistent resource'))
-        } else if (result.status === 400) {
-            next(boom.badRequest('invalid or inexistent action'))
-        } else {
-            res.status(200).json({
-                message: result.msg,
-                statusCode: '200',
-                data: result
-            })
-        }
+        const { rol, new_status } = req.body
+        const result = await services.updateLoan(rol, req.params.loandId, new_status)
+        // if (result.status === 0) {
+        //     next(boom.notFound('Inexistent resource'))
+        // } else if (result.status === 400) {
+        //     next(boom.badRequest('invalid or inexistent action'))
+        // } else {
+        res.status(200).json({
+            message: result.msg,
+            statusCode: '200',
+            data: result
+        })
+        // }
     } catch (error) {
         next(error)
     }

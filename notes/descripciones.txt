@@ -11,7 +11,7 @@ Estados de los préstamos:
 
 1 - solicitado - esperando aprobación
 2 - rechazado
-3 - coodeudores aprobados, en espera de aprobación de tesoreria
+3 - en espera de aprobacion de admin y codeudores
 4 - aprobado, esperando documentos de soporte
 5 - aprobado, esperando desembolso
 6 - desembolso confirmado una parte, préstamo en proceso
@@ -25,7 +25,8 @@ Estados de coorelaciones de coodeudores:
 
 1 - en espera de aprobacion
 2 - rechazado
-3 - apobado
+3 - aprobado
+4 - firmado desembolso
 
 
 

@@ -1,9 +1,12 @@
 /*
-system conditions: 
+system conditions:
     term: numero maximo de MESES.
             -> 0 pasa 1 no aprovado
 
-    maxAmount: [capital total, porcentaje]
+    selfDebtMaxAmount: [capital total, porcentaje]
+            -> 0 pasa 1 no aprovado
+
+    cosignersMaxAmount: [capital total, porcentaje]
             -> 0 pasa 1 no aprovado
 
     accountAgeing: AÑOS de antiguedad de la cuenta
@@ -52,8 +55,7 @@ const ordinarioCuotaFija = {
         loanCode: 1,
         filters: {
                 selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
-                term: 60,
-                needCosigners: false
+                term: 60
         },
         warmings: {},
         features: {
@@ -68,7 +70,7 @@ const ordinarioSinCuotaFija = {
         filters: {
                 term: 12,
                 selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
-                needCosigners: false
+                
         },
         warmings: {},
         features: {
@@ -95,8 +97,7 @@ const extraordinario = {
                 selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
                 cosignersMaxAmount: ['USER_FREE_CAPITAL', 90],
                 term: 60,
-                actualLoans: 1,
-                needCosigners: true
+                actualLoans: 1
         },
         warmings: {
                 postApplymentDocs: ['Necesario adjuntar pagaré e instructivo']
