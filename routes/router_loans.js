@@ -25,11 +25,15 @@ router.get('/', async (req, res, next) => {
 router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
     try {
         const result = await services.applyNewLoan(req.body)
-        res.status(201).json({
-            message: 'Loan setted',
-            statusCode: '201',
-            data: result
-        })
+        if (result.approval) {
+            res.status(201).json({
+                message: 'Loan setted',
+                statusCode: '201',
+                data: result
+            })
+        } else {
+            next(boom.notAcceptable(result.msg))
+        }
     } catch (error) {
         next(error)
     }

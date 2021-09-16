@@ -3,10 +3,10 @@ system conditions:
     term: numero maximo de MESES.
             -> 0 pasa 1 no aprovado
 
-    selfDebtMaxAmount: [capital total, porcentaje]
+    selfDebtMaxAmount: [capital total, porcentaje, necesita coodeudor]
             -> 0 pasa 1 no aprovado
 
-    cosignersMaxAmount: [capital total, porcentaje]
+    cosignersMaxAmount: [capital total, porcentaje, coodeudores respaldan toda la cuota]
             -> 0 pasa 1 no aprovado
 
     accountAgeing: AÑOS de antiguedad de la cuenta
@@ -54,7 +54,7 @@ const validator = require('../../lib/loan_handler')
 const ordinarioCuotaFija = {
         loanCode: 1,
         filters: {
-                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90, false],
                 term: 60
         },
         warmings: {},
@@ -69,8 +69,8 @@ const ordinarioSinCuotaFija = {
         loanCode: 2,
         filters: {
                 term: 12,
-                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
-                
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90, false],
+
         },
         warmings: {},
         features: {
@@ -94,8 +94,8 @@ const ordinarioSinCuotaFija = {
 const extraordinario = {
         loanCode: 3,
         filters: {
-                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90],
-                cosignersMaxAmount: ['USER_FREE_CAPITAL', 90],
+                cosignersMaxAmount: ['USER_FREE_CAPITAL', 90, true],
+                selfDebtMaxAmount: ['USER_FREE_CAPITAL', 90, true],
                 term: 60,
                 actualLoans: 1
         },
@@ -127,7 +127,8 @@ const extraordinario = {
 const extraExtraordinario = {
         loanCode: 4,
         filters: {
-                selfDebtMaxAmount: ['TOTAL_COMPANY_CASH', 90],
+                selfDebtMaxAmount: ['TOTAL_COMPANY_CASH', 90, false],
+                cosignersMaxAmount: ['USER_FREE_CAPITAL', 90, false],
                 term: 60,
                 accountAgeing: 2,
                 actualLoans: 0

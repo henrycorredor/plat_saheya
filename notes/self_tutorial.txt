@@ -27,3 +27,18 @@ esc -> normal mode
 :q! -> salir sin guardar cambios
 u -> deshacer
 ctl + r -> rehacer
+
+
+
+////////
+
+manejo de JWT
+
+bcrypt -> libreria para encriptar las contraseñas
+  -> const hashedpassword = await bcrypt.hash(string, 10)
+  -> bcrypt.compare(ingreso, DB)
+
+Librerias
+  passport jsonwebtoken passport-http passport-jwt
+
+  keygen.io -> generar 265 bits string
