@@ -17,7 +17,7 @@ class LoanServices {
         const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-', coo.monto_avalado, '-', coo.aprobado ORDER BY coo.orden) AS coodeudores
         FROM prestamos pre
         LEFT JOIN relaciones_coodeudores coo
-        ON pre.prestamo_id = coo.id_prestamo
+        ON pre.prestamo_id = coo.id_prestamo AND coo.id_codeudor != 0
         GROUP BY pre.prestamo_id`
 
         const data = this.db.doQuery(query)
@@ -53,7 +53,8 @@ class LoanServices {
 
             delete data.coodeudores
 
-            if (cosigners.length === 0) { data.estado = 3 } //default state in DB = 1
+            //if loan doesn't need further aproval, it directly goes to state 4
+            if (cosigners.length === 0) { data.estado = 4 } //default state in DB = 1
 
             const result = await this.db.upsert('prestamos', data)
 
@@ -84,7 +85,7 @@ class LoanServices {
         const loan = await this.db.getData('prestamos', `prestamo_id = ${id}`)
         if (loan) {
             const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${id}`, `id_codeudor, monto_avalado, aprobado`)
-            loan[0].coodeudores = cosigners
+            loan[0].coodeudores = cosigners.filter(cos => cos.id_codeudor !== 0)
         }
         return loan
     }
@@ -116,7 +117,7 @@ class LoanServices {
                     const myRelcase2 = relationships.filter(rel => (rel.rol === rol && rel.id_codeudor === userId && rel.aprobado === 1))
 
                     if (myRelcase2.length === 0) {
-                        throw boom.badRequest('no resource found')
+                        throw boom.badRequest('wrong request')
                     } else {
                         await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
                     }
@@ -146,7 +147,7 @@ class LoanServices {
                     }
                     await this.db.upsert('relaciones_coodeudores', { aprobado: status, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${userId} AND rol = ${rol}`)
 
-                    toReturn.msg = `loan id ${loan_id} has been apoved by user ${userId}`
+                    toReturn.msg = `loan id ${loan_id} has been apoved by user ${userId} rol ${rol}`
                     toReturn.newStatus = status
                     toReturn.rol = rol
 
@@ -165,16 +166,22 @@ class LoanServices {
                     const [loanInfo] = await this.db.getData('prestamos', `prestamo_id = ${loan_id}`, 'estado, deudor_id, monto')
 
                     if (loanInfo.estado === 4 && rol === 3) {
-                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `restamo_id = ${loan_id}`)
-                        const cosigners = await this.db.getData('relacion_coodeudores', `id_prestamo = ${loan_id} and rol = 1`, "monto_avalado")
+                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                        const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id} and rol = 1`, "monto_avalado, id_codeudor")
+
                         let cosignedAmount = 0
-                        for (i = 0; i < cosigners.length; i++) {
-                            cosignedAmount += Number(cosigners[i].monto_avalado)
+
+                        if (cosigners) {
+                            for (let i = 0; i < cosigners.length; i++) {
+                                await this.db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${cosigners[i].monto_avalado} where usuario_id = ${cosigners[i].id_codeudor}`)
+                                cosignedAmount += Number(cosigners[i].monto_avalado)
+                            }
                         }
+
                         const selfSupported = Number(loanInfo.monto) - cosignedAmount
-                        await this.db.upsert('usuarios', `en_deuda = en_deuda + ${selfSupported}`, `usuario_id = ${loanInfo.deudor_id}`)
+                        await this.db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${selfSupported} where usuario_id = ${loanInfo.deudor_id}`)
                     } else {
-                        throw boom.badRequest('no resource found')
+                        throw boom.badRequest('Wrong request')
                     }
 
                     toReturn.msg = `loan id ${loan_id} has confirmed`
@@ -190,7 +197,7 @@ class LoanServices {
                     //status 5 -> 6 (nobody has confirmed, jumps to 6 to wait treasury's confirmation)
                     //status 7 -> 8 (treasury has confirmed, jumps to 8 as both sides confirmation)
 
-                    const [loanStatusCase6] = this.db.getData('prestamos', `prestamo_id = ${loan_id}`, 'estado')
+                    const [loanStatusCase6] = await this.db.getData('prestamos', `prestamo_id = ${loan_id}`, 'estado')
 
                     if (rol !== 1) {
                         throw boom.unauthorized('not autorized petition')
@@ -198,7 +205,7 @@ class LoanServices {
 
                     if (loanStatusCase6.estado === 5 || loanStatusCase6.estado === 7) {
                         const status = (loanStatusCase6.estado === 5) ? 6 : 8
-                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `restamo_id = ${loan_id}`)
+                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
                     } else {
                         throw boom.badRequest('no resource found')
                     }
@@ -214,8 +221,7 @@ class LoanServices {
                 case 7:
                     //status 5 -> 7 (nobody has confirmed, jumps to 7 to wait user confirmation)
                     //status 6 -> (user has confirmed, jumps to 8 as both sides confirmation)
-
-                    const [loanStatusCase7] = this.db.getData('prestamos', `prestamo_id = ${loan_id}`, 'estado')
+                    const [loanStatusCase7] = await this.db.getData('prestamos', `prestamo_id = ${loan_id}`, 'estado')
 
                     if (rol !== 3) {
                         throw boom.unauthorized('not autorized petition')
@@ -223,20 +229,20 @@ class LoanServices {
 
                     if (loanStatusCase7.estado === 5 || loanStatusCase7.estado === 6) {
                         const status = (loanStatusCase7.estado === 5) ? 7 : 8
-                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `restamo_id = ${loan_id}`)
+                        await this.db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
                     } else {
                         throw boom.badRequest('no resource found')
                     }
 
-                    toReturn.msg = `loan id ${loan_id} disbursement has been confirmed by user ${userId}`
+                    toReturn.msg = `loan id ${loan_id} disbursement has been confirmed by rol ${rol}`
                     toReturn.newStatus = status
                     toReturn.rol = rol
 
                     break
-                // 8 - prestamo pagado
-                // (el sistema verifica si la ultima cuota se pago a conformidad y cierra el prestamo)
-                case 8:
-                    // por definir método
+                // 8 - desembolso confirmado ambas partes, préstamo en proceso
+                // (el sistema verifica que el prestamo ha sido pagado completamete, se pasa a 9)
+                case 10:
+                    // congelar prestamo. Por definir. 
 
                     break
                 default:

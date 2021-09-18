@@ -27,7 +27,6 @@ Estados de coorelaciones de coodeudores:
 1 - en espera de aprobacion
 2 - rechazado
 3 - aprobado
-4 - firmado desembolso
 
 
 
