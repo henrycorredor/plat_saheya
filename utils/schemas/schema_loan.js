@@ -14,7 +14,15 @@ const applyLoanSchema = joi.object({
 
 const updateLoanStatus = joi.object({
     rol: joi.number().required(),
-    new_status: joi.number().required()
+    new_status: joi.string().allow(
+        '2-reject',
+        '3-accept',
+        '5-treasurer-approve',
+        '6-treasurer-confirm-disbursement',
+        '7-user-confirm-disbursement',
+        '8-loan-ended',
+        '10-freeze'
+    ).required()
 })
 
 module.exports = { applyLoanSchema, updateLoanStatus }
