@@ -104,8 +104,7 @@ const extraordinario = {
         filters: {
                 cosignersMaxAmount: {
                         capitalFunds: 'USER_FREE_CAPITAL',
-                        percentageAllowed: 90,
-                        cosignerNeeded: true
+                        percentageAllowed: 90
                 },
                 selfDebtMaxAmount: {
                         capitalFunds: 'USER_FREE_CAPITAL',
@@ -148,8 +147,7 @@ const extraExtraordinario = {
                 },
                 cosignersMaxAmount: {
                         capitalFunds: 'USER_FREE_CAPITAL',
-                        percentageAllowed: 90,
-                        cosignerNeeded: false
+                        percentageAllowed: 90
                 },
                 term: 60,
                 accountAgeing: 2,

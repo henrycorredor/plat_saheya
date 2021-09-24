@@ -60,21 +60,38 @@ router.put('/:loandId', validationHandler(updateLoanStatus, 'body'), async (req,
     try {
         const { rol, new_status } = req.body
         const result = await services.updateLoan(rol, req.params.loandId, new_status)
-        // if (result.status === 0) {
-        //     next(boom.notFound('Inexistent resource'))
-        // } else if (result.status === 400) {
-        //     next(boom.badRequest('invalid or inexistent action'))
-        // } else {
         res.status(200).json({
             message: result.msg,
             statusCode: '200',
             data: result
         })
-        // }
     } catch (error) {
         next(error)
     }
 })
 
+router.get('/:loanId/cuote', async (req, res, next) => {
+    res.json({
+        message: `Cuote list for ${req.params.loanId}`,
+        statusCode: '200',
+        data: 'miau'
+    })
+})
+
+router.get('/:loanId/cuote/:cuoteId', async (req, res, next) => {
+    res.json({
+        message: `Cuote id ${req.params.cuoteId} for ${req.params.loanId}`,
+        statusCode: '200',
+        data: 'miau'
+    })
+})
+
+router.put('/:loanId/cuote/:cuoteId', async (req, res, next) => {
+    res.json({
+        message: `Cuote id ${req.params.cuoteId} for ${req.params.loanId} updated`,
+        statusCode: '200',
+        data: 'miau'
+    })
+})
 
 module.exports = router

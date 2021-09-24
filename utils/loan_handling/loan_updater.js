@@ -1,5 +1,6 @@
 const moment = require('moment')
 const boom = require('@hapi/boom')
+const generateCuotes = require('./cuotes_generator')
 const MySqlClass = require('../../lib/mysql')
 
 const loanUpdater = async function (relationships, loan_id, status, user_id, rol) {
@@ -48,6 +49,7 @@ const loanUpdater = async function (relationships, loan_id, status, user_id, rol
                 const isTheLast = relationships.filter(rels => rels.aprobado === 1)
                 if (isTheLast.length === 1) {
                     await db.upsert('prestamos', { estado: 4, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                    await generateCuotes(loan_id)
                 }
             }
             await db.upsert('relaciones_coodeudores', { aprobado: 3, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id} AND rol = ${rol}`)

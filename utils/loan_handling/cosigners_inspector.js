@@ -1,7 +1,7 @@
 require('dotenv').config()
 const MySqlClass = require('../../lib/mysql')
 
-async function cosignersHandler(loan_amount, cosigners_array, capital_percentage_allowed) {
+async function cosignersInspector(loan_amount, cosigners_array, capital_percentage_allowed) {
     db = new MySqlClass()
     let toReturn = [true, '']
 
@@ -26,4 +26,4 @@ async function cosignersHandler(loan_amount, cosigners_array, capital_percentage
     return toReturn
 }
 
-module.exports = cosignersHandler
+module.exports = cosignersInspector

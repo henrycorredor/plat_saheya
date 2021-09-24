@@ -73,7 +73,7 @@ CREATE TABLE `prestamos` (
   `ultima_actualizacion` DATE NULL DEFAULT NULL,
   `pagado` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`prestamo_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +112,7 @@ CREATE TABLE `transacciones` (
   `motivo` tinyint(1) NOT NULL,
   `comentario` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   PRIMARY KEY (`transaccion_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -178,6 +178,21 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB AUTO_INCREMENT DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+DROP TABLE IF EXISTS `cuotas`;
+CREATE TABLE `cuotas` (
+  `cuota_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `id_prestamo`  int unsigned NOT NULL,
+  `monto` int unsigned NOT NULL,
+  `en_deuda_futura` int unsigned NOT NULL,
+  `vigencia_desde` date NOT NULL,
+  `vigencia_hasta` date NOT NULL,
+  `interes` int unsigned NOT NULL,
+  `multa` int unsigned NOT NULL,
+  `pagado` int unsigned NOT NULL DEFAULT '0',
+  `en_deuda` int unsigned NOT NULL,
+  PRIMARY KEY (`cuota_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

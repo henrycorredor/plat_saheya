@@ -107,7 +107,10 @@ class LoanServices {
         */
 
         rol = Number(rol)
+
+        //if is an admin user, user ID is useless and is setted to 0
         const userId = (rol === 1) ? Number(process.env.USER_ID) : 0
+        
         const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id}`)
 
         if (relationships) {

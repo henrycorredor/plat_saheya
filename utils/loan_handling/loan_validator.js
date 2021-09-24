@@ -1,6 +1,6 @@
 require('dotenv').config()
 const moment = require('moment')
-const cosignersHandler = require('./cosigners_handler')
+const cosignersInspector = require('./cosigners_inspector')
 const MySqlClass = require('../../lib/mysql')
 
 const conditions = {
@@ -91,7 +91,7 @@ const val = {
                 msg.approval = false
                 msg.msg = 'No ha solicitado soporte de coodeudores.'
             } else {
-                const cosigners_validation = await cosignersHandler(user_loan_aplication.monto, user_loan_aplication.coodeudores, this.filters.selfDebtMaxAmount[1])
+                const cosigners_validation = await cosignersInspector(user_loan_aplication.monto, user_loan_aplication.coodeudores, this.filters.selfDebtMaxAmount.percentageAllowed)
                 if (!cosigners_validation[0]) {
                     msg.approval = false
                     msg.msg = cosigners_validation[1]
