@@ -19,6 +19,12 @@
 -- Table structure for table `capital`
 --
 
+DROP DATABASE IF EXISTS saheya_v01;
+
+CREATE DATABASE saheya_v01;
+
+USE saheya_v01;
+
 DROP TABLE IF EXISTS `capital`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -55,7 +61,7 @@ DROP TABLE IF EXISTS `prestamos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prestamos` (
-  `prestamo_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `prestamo_id`  int unsigned NOT NULL AUTO_INCREMENT,
   `tipo` tinyint NOT NULL DEFAULT '1',
   `fecha_inicial` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `num_cuotas` tinyint NOT NULL,
@@ -65,7 +71,7 @@ CREATE TABLE `prestamos` (
   `monto` int DEFAULT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `ultima_actualizacion` DATE NULL DEFAULT NULL,
-  `pagado` int NOT NULL DEFAULT '0'
+  `pagado` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`prestamo_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -85,7 +91,7 @@ CREATE TABLE `relaciones_coodeudores` (
   `orden` int NOT NULL DEFAULT '1',
   `aprobado` tinyint NOT NULL DEFAULT '1',
   `fecha_aprobacion` timestamp NULL DEFAULT NULL,
-  `rol` tinyint NOT NULL DEFAULT '1'
+  `rol` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_relacion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -169,7 +175,7 @@ CREATE TABLE `usuarios` (
   PRIMARY KEY (`usuario_id`),
   UNIQUE KEY `num_identificacion` (`num_identificacion`),
   UNIQUE KEY `telefono_ppal` (`telefono_ppal`)
-) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

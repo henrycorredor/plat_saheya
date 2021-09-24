@@ -20,10 +20,6 @@
       "description": "Administración de préstamos"
     },
     {
-      "name": "cuotes",
-      "description": "Manejo de cuotas de todos los tipos de préstamos"
-    },
-    {
       "name": "payments",
       "description": "Administracion de los pagos hechos por los usuarios"
     },
@@ -256,8 +252,8 @@
         "tags": [
           "loans"
         ],
-        "summary": "Cosigners and Treasure aprove - reject - confirm loans.",
-        "description": "Use this method to approve or reject co-signed loans. Users can only modify loans under the respective account.",
+        "summary": "Cosigners and Admin aprove - reject - confirm loans.",
+        "description": "Use this method to approve or reject co-signed loans. Users can only modify loans under the respective account, or with admin roles.",
         "operationId": "updateLoan",
         "parameters": [
           {
@@ -271,7 +267,7 @@
           {
             "name": "body",
             "in": "body",
-            "description": "actions `cosigner_approval` , `treasury_approval` , `conf_one_side_disbursement` or `conf_double_side_disbursement`",
+            "description": "actions `2-reject` , `3-accept`, `5-treasurer-approve`,  `6-treasurer-confirm-disbursement`, `7-user-confirm-disbursement`, `8-loan-ended`, `10-freeze`",
             "required": true,
             "schema": {
               "$ref": "#/definitions/UpdateLoan"
@@ -281,6 +277,116 @@
         "responses": {
           "200": {
             "description": "Loan modified."
+          }
+        }
+      }
+    },
+    "/loan/{loanId}/cuote": {
+      "get": {
+        "tags": [
+          "loans"
+        ],
+        "summary": "List cuotes of certain loan.",
+        "description": "Get the whole list of the respective loan cuotes.",
+        "operationId": "listCuotes",
+        "parameters": [
+          {
+            "name": "loanId",
+            "in": "path",
+            "description": "Loan ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Cuote",
+            "schema": {
+              "$ref": "#/definitions/Cuote"
+            }
+          }
+        }
+      }
+    },
+    "/loan/{loanId}/cuote/{cuoteId}": {
+      "get": {
+        "tags": [
+          "loans"
+        ],
+        "summary": "List one cuote.",
+        "description": "Get all the info or a certain cuote.",
+        "operationId": "listCuote",
+        "parameters": [
+          {
+            "name": "loanId",
+            "in": "path",
+            "description": "Loan ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "cuoteId",
+            "in": "path",
+            "description": "Cuote ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Cuote",
+            "schema": {
+              "$ref": "#/definitions/Cuote"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "loans"
+        ],
+        "summary": "Confirm cuote payment",
+        "description": "Use this method to pay a cuote and decide what to do if action required",
+        "operationId": "updateCuote",
+        "parameters": [
+          {
+            "name": "loanId",
+            "in": "path",
+            "description": "ID cuote's loan",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "cuoteId",
+            "in": "path",
+            "description": "Cuote ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "tells how much was payed, and action to update the rest of the cuotes.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateCuote"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Cuote updated."
           }
         }
       }
@@ -348,15 +454,77 @@
     "UpdateLoan": {
       "type": "object",
       "properties": {
-        "user_id": {
+        "rol": {
           "type": "integer",
           "format": "int64"
         },
-        "action": {
-          "type": "string"
-        },
         "new_status": {
-          "type": "boolean"
+          "type": "string"
+        }
+      }
+    },
+    "Cuote": {
+      "type": "object",
+      "properties": {
+        "cuote_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "loan_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "future_debt": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "initial_date": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expiration_date": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "interest": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "fine": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "payed": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "actual_in_debt": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "UpdateCuote": {
+      "type": "object",
+      "properties": {
+        "cuote_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "amount_payed": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "date": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "further_action": {
+          "type": "string"
         }
       }
     }

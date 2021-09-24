@@ -50,7 +50,7 @@ class LoanServices {
         if (result.approval) {
 
             const cosigners = (data.coodeudores) ? data.coodeudores : []
-            const admin_credentials = (loanData.features.adminPermission) ? loanData.features.adminPermission : []
+            const adminCredentials = (loanData.features.adminPermission) ? loanData.features.adminPermission : []
 
             delete data.coodeudores
 
@@ -59,24 +59,26 @@ class LoanServices {
 
             const result = await this.db.upsert('prestamos', data)
 
-            for (i = 0; i < cosigners.length; i++) {
+            const setCosigners = cosigners.map(async (cosigner, index) => {
                 await this.db.upsert('relaciones_coodeudores', {
                     id_prestamo: result.insertId,
-                    id_codeudor: cosigners[i].id_codeudor,
-                    monto_avalado: cosigners[i].monto_avalado,
-                    orden: i + 1
+                    id_codeudor: cosigner.id_codeudor,
+                    monto_avalado: cosigner.monto_avalado,
+                    orden: index
                 })
-            }
+            })
+            await Promise.all(setCosigners)
 
-            for (i = 0; i < admin_credentials.length; i++) {
+            const setAdmin = adminCredentials.map(async adminRole => {
                 await this.db.upsert('relaciones_coodeudores', {
                     id_prestamo: result.insertId,
                     id_codeudor: 0,
                     monto_avalado: 0,
                     orden: 0,
-                    rol: admin_credentials[i]
+                    rol: adminRole
                 })
-            }
+            })
+            await Promise.all(setAdmin)
         }
 
         return result
