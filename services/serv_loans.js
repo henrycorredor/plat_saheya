@@ -53,11 +53,13 @@ class LoanServices {
 
             delete data.coodeudores
 
-            const result = await this.db.upsert('prestamos', data)
+            const setLoanQuery = await this.db.upsert('prestamos', data)
+
+            result.loanId = setLoanQuery.insertId
 
             const setCosigners = cosigners.map(async (cosigner, index) => {
                 await this.db.upsert('relaciones_coodeudores', {
-                    id_prestamo: result.insertId,
+                    id_prestamo: setLoanQuery.insertId,
                     id_codeudor: cosigner.id_codeudor,
                     monto_avalado: cosigner.monto_avalado,
                     orden: index
@@ -67,7 +69,7 @@ class LoanServices {
 
             const setAdmin = adminCredentials.map(async adminRole => {
                 await this.db.upsert('relaciones_coodeudores', {
-                    id_prestamo: result.insertId,
+                    id_prestamo: setLoanQuery.insertId,
                     id_codeudor: 0,
                     monto_avalado: 0,
                     orden: 0,
@@ -106,7 +108,7 @@ class LoanServices {
 
         //if is an admin user, user ID is useless and is setted to 0
         const userId = (rol === 1) ? Number(process.env.USER_ID) : 0
-        
+
         const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id}`)
 
         if (relationships) {

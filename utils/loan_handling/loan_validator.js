@@ -8,9 +8,10 @@ const conditions = {
 
     compare: (more, less, msg) => (more >= less) ? [true, 'pass'] : [false, msg],
 
-    getCapitalVsLoanPercent: async function (squema_capital_source, user_loan_amount, user_id) {
+    /*getCapitalVsLoanPercent: async function (squema_capital_source, user_loan_amount, user_id) {
         if (squema_capital_source === 'USER_FREE_CAPITAL') {
             const [userInfo] = await this.db.getData('usuarios', `usuario_id = ${user_id}`, `capital, en_deuda`)
+
             const userFreeCapital = Number(userInfo.capital) - Number(userInfo.en_deuda)
             return (100 * user_loan_amount) / userFreeCapital
         }
@@ -18,7 +19,7 @@ const conditions = {
             const [totalCapital] = await this.db.getData('capital', `mov_id > 1 ORDER BY mov_id DESC LIMIT 1`, `total_actual`)
             return (100 * user_loan_amount) / totalCapital.total_actual
         }
-    },
+    },*/
 
     term: function (schemaMonths, userMonths) {
         return this.compare(schemaMonths, userMonths, 'Ha superado numero de meses máximo de plazo para este tipo de préstamo.')
@@ -35,11 +36,19 @@ const conditions = {
     },
 
     cosignersMaxAmount: async function ({ capitalFunds, percentageAllowed }, cosigners_array) {
-        for (i = 0; i < cosigners_array.length; i++) {
-            freeCapitalVsLoanPercent = await this.getCapitalVsLoanPercent(capitalFunds, cosigners_array[i].monto_avalado, cosigners_array[i].id_codeudor)
-            if (freeCapitalVsLoanPercent > percentageAllowed) {
-                return [false, `El coodeudor '${cosigners_array[i].id_codeudor}' excede el monto de su capital libre.`]
+        if (capitalFunds === 'USER_FREE_CAPITAL') {
+            let userInfo
+            let freeCapital
+            for (i = 0; i < cosigners_array.length; i++) {
+                [userInfo] = await this.db.getData('usuarios', `usuario_id = ${cosigners_array[i].id_codeudor}`, `capital, en_deuda`)
+                freeCapital = ((Number(userInfo.capital) * percentageAllowed) / 100) - Number(userInfo.en_deuda)
+                
+                if (freeCapital < cosigners_array[i].monto_avalado) {
+                    return [false, `El coodeudor '${cosigners_array[i].id_codeudor}' excede el monto de su capital libre.`]
+                }
             }
+        } else if (capitalFunds === 'TOTAL_COMPANY_CASH') {
+
         }
         return [true, 'pass']
     },

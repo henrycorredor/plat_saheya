@@ -17,49 +17,45 @@ const cuotesGenerator = async function (loan_id) {
 
     const [loanSchema] = loanSchemas.filter(schema => schema.loanCode === loan.tipo)
 
+    const lastDayOfMonth = moment(loan.fecha_inicial).endOf('month')
+    const monthDaysLeft = moment(lastDayOfMonth).diff(moment(loan.fecha_inicial), 'days')
+
+    const daysInMonth = moment(loan.fecha_inicial, "YYYY-MM").daysInMonth()
+
+    const addMonthsRatio = (loan.mes_inicial === 'this') ? 0 : 1
+
+    let validfrom
+    let validUntil
+    let onDebt = 0
+
     switch (loanSchema.features.cuoteType) {
         case 'MONTH_FIXED_CUOTE':
             const data = []
 
-            const realCuoteAmount = (loan.monto / loan.num_cuotas).toFixed(2)
-            const cuoteRounded = roundToCeil(realCuoteAmount, 100)
-
             let fixedCuote = 0
             let surplus = 0
-            let onDebt = 0
             let onDebtMemory = 0
             let interestByMonth = 0
             let interestAcumulated = 0
-            let validfrom
-            let validUntil
-            let addMonthsRatio
+
+            const realCuoteAmount = (loan.monto / loan.num_cuotas).toFixed(2)
+            const cuoteRounded = roundToCeil(realCuoteAmount, 100)
 
             for (i = 0; i < loan.num_cuotas; i++) {
                 onDebtMemory = (onDebtMemory === 0) ? loan.monto : onDebt
-                onDebt = onDebtMemory - cuoteRounded
 
                 interestByMonth = roundToCeil((onDebtMemory * loanSchema.features.interest) / 100, 100)
 
                 if (i === 0) {
-                    const lastDayOfMonth = moment(loan.fecha_inicial).endOf('month')
-                    const monthDaysLeft = moment(lastDayOfMonth).diff(moment(loan.fecha_inicial), 'days')
-
-                    const daysInMonth = moment(loan.fecha_inicial, "YYYY-MM").daysInMonth()
-
                     const interestFractionOfMonth = roundToCeil((interestByMonth * monthDaysLeft) / daysInMonth, 100)
-                    console.log('todo el mes: ', daysInMonth, 'dias restantes: ', monthDaysLeft, 'interes de un mes: ', interestByMonth, 'interes fraccion', interestFractionOfMonth)
                     interestByMonth = (loan.mes_inicial === 'this') ? interestFractionOfMonth : interestByMonth + interestFractionOfMonth
                 }
 
                 interestAcumulated += interestByMonth
 
-                console.log(i, interestByMonth, interestAcumulated)
-
                 surplus += (cuoteRounded - realCuoteAmount)
 
-                fixedCuote = (i === (loan.num_cuotas - 1)) ? cuoteRounded : roundToCeil(cuoteRounded - surplus, 100)
-
-                addMonthsRatio = (loan.mes_inicial === 'this') ? 0 : 1
+                fixedCuote = (i === (loan.num_cuotas - 1)) ? roundToCeil(cuoteRounded - surplus, 100) : cuoteRounded
 
                 validfrom = moment(loan.fecha_inicial).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
                 validUntil = moment(validfrom).endOf('month').format('YYYY-MM-DD')
@@ -70,8 +66,16 @@ const cuotesGenerator = async function (loan_id) {
                     }
                 }
 
+                onDebt = onDebtMemory - fixedCuote
+
+                if (onDebt < 0) {
+                    fixedCuote = fixedCuote + onDebt
+                    onDebt = 0
+                }
+
                 data.push({
                     id_prestamo: loan_id,
+                    cuota_num: i + 1,
                     monto: fixedCuote,
                     en_deuda_futura: onDebt,
                     vigencia_desde: validfrom,
@@ -91,11 +95,49 @@ const cuotesGenerator = async function (loan_id) {
             })
 
             await Promise.all(insertCuotes)
-
             break
 
         case 'ONLY_MONTHLY_INTEREST':
+            const fixed_interest = roundToCeil((loan.monto * loanSchema.features.interest) / 100, 100)
+            let interest_this_month
+            let cuote
 
+            for (i = 0; i < loan.num_cuotas; i++) {
+                validfrom = moment(loan.fecha_inicial).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
+                validUntil = moment(validfrom).endOf('month').format('YYYY-MM-DD')
+
+                if (i === 0) {
+                    const interestFractionOfMonth = roundToCeil((fixed_interest * monthDaysLeft) / daysInMonth, 100)
+                    interest_this_month = (loan.mes_inicial === 'this') ? interestFractionOfMonth : fixed_interest + interestFractionOfMonth
+
+                    if (loan.mes_inicial === 'this') {
+                        validfrom = moment(loan.fecha_inicial).format('YYYY-MM-DD')
+                    }
+                } else {
+                    interest_this_month = fixed_interest
+                }
+
+                if (i === loan.num_cuotas - 1) {
+                    cuote = loan.monto
+                    onDebt = 0
+                } else {
+                    cuote = 0
+                    onDebt = loan.monto
+                }
+
+                await db.upsert('cuotas', {
+                    id_prestamo: loan_id,
+                    monto: cuote,
+                    cuota_num: i + 1,
+                    en_deuda_futura: onDebt,
+                    vigencia_desde: validfrom,
+                    vigencia_hasta: validUntil,
+                    interes: interest_this_month,
+                    multa: 0,
+                    pagado: 0,
+                    en_deuda: loan.monto
+                })
+            }
             break
 
         default:
@@ -103,42 +145,3 @@ const cuotesGenerator = async function (loan_id) {
 }
 
 module.exports = cuotesGenerator
-
-/*
-loanCode: 4,
-        filters: {
-                selfDebtMaxAmount: {
-                        capitalFunds: 'TOTAL_COMPANY_CASH',
-                        percentageAllowed: 90,
-                        cosignerNeeded: false
-                },
-                cosignersMaxAmount: {
-                        capitalFunds: 'USER_FREE_CAPITAL',
-                        percentageAllowed: 90
-                },
-                term: 60,
-                accountAgeing: 2,
-                actualLoans: 0
-        },
-        warmings: {
-                postApplymentDocs: ['Pagaré e Instructivo firmado por el socio y el coodeudor']
-        },
-        features: {
-                adminPermission: [3, 4, 5],
-                interest: 0.8,
-                cuoteType: 'MONTH_FIXED_CUOTE',
-        }
-
-
-        cuote_id	integer($int64)
-
-loan_id	integer($int64)
-amount	integer($int64)
-future_debt	integer($int64)
-initial_date	integer($int64)
-expiration_date	integer($int64)
-interest	integer($int64)
-fine	integer($int64)
-payed	integer($int64)
-actual_in_debt	integer($int64)
-}*/

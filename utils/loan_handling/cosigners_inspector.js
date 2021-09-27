@@ -7,15 +7,14 @@ async function cosignersInspector(loan_amount, cosigners_array, capital_percenta
 
     const [userInfo] = await db.getData('usuarios', `usuario_id = ${process.env.USER_ID}`, 'capital, en_deuda')
 
-    const userFreeCapital = Number(userInfo.capital) - Number(userInfo.en_deuda)
-    const userAbleCapital = ((userFreeCapital * capital_percentage_allowed) / 100)
+    const userFreeCapital = ((Number(userInfo.capital) * capital_percentage_allowed) / 100) - Number(userInfo.en_deuda)
 
     let cosignedAmount = 0
-    for (i = 0; i < cosigners_array.length; i++) {
-        cosignedAmount += Number(cosigners_array[i].monto_avalado)
-    }
+    cosigners_array.forEach(cosigner => {
+        cosignedAmount += Number(cosigner.monto_avalado)
+    })
 
-    const unsuported = Number(loan_amount) - userAbleCapital - cosignedAmount
+    const unsuported = Number(loan_amount) - userFreeCapital - cosignedAmount
 
     if (unsuported < 0) {
         toReturn = [false, `Hay un exceso en el respaldo de ${(unsuported * -1)}.`]
