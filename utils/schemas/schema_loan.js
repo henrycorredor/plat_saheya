@@ -2,6 +2,10 @@ const joi = require("@hapi/joi")
 
 const applyLoanSchema = joi.object({
     fecha_inicial: joi.date().required(),
+    mes_inicial: joi.string().valid(
+        'this',
+        'next'
+    ).required(),
     num_cuotas: joi.string().required(),
     deudor_id: joi.number().required(),
     monto: joi.number().required(),
@@ -14,7 +18,7 @@ const applyLoanSchema = joi.object({
 
 const updateLoanStatus = joi.object({
     rol: joi.number().required(),
-    new_status: joi.string().allow(
+    new_status: joi.string().valid(
         '2-reject',
         '3-accept',
         '5-treasurer-approve',

@@ -36,7 +36,6 @@ class LoanServices {
                 break
             case 3:
                 result = await extraordinario.validator(data)
-
                 break
             case 4:
                 result = await extraExtraordinario.validator(data)
@@ -53,9 +52,6 @@ class LoanServices {
             const adminCredentials = (loanData.features.adminPermission) ? loanData.features.adminPermission : []
 
             delete data.coodeudores
-
-            //if loan doesn't need further aproval, it directly goes to state 4
-            if (cosigners.length === 0) { data.estado = 4 } //default state in DB = 1
 
             const result = await this.db.upsert('prestamos', data)
 

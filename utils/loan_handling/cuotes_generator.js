@@ -30,7 +30,9 @@ const cuotesGenerator = async function (loan_id) {
             let onDebtMemory = 0
             let interestByMonth = 0
             let interestAcumulated = 0
-
+            let validfrom
+            let validUntil
+            let addMonthsRatio
 
             for (i = 0; i < loan.num_cuotas; i++) {
                 onDebtMemory = (onDebtMemory === 0) ? loan.monto : onDebt
@@ -38,19 +40,42 @@ const cuotesGenerator = async function (loan_id) {
 
                 interestByMonth = roundToCeil((onDebtMemory * loanSchema.features.interest) / 100, 100)
 
+                if (i === 0) {
+                    const lastDayOfMonth = moment(loan.fecha_inicial).endOf('month')
+                    const monthDaysLeft = moment(lastDayOfMonth).diff(moment(loan.fecha_inicial), 'days')
+
+                    const daysInMonth = moment(loan.fecha_inicial, "YYYY-MM").daysInMonth()
+
+                    const interestFractionOfMonth = roundToCeil((interestByMonth * monthDaysLeft) / daysInMonth, 100)
+                    console.log('todo el mes: ', daysInMonth, 'dias restantes: ', monthDaysLeft, 'interes de un mes: ', interestByMonth, 'interes fraccion', interestFractionOfMonth)
+                    interestByMonth = (loan.mes_inicial === 'this') ? interestFractionOfMonth : interestByMonth + interestFractionOfMonth
+                }
+
                 interestAcumulated += interestByMonth
+
+                console.log(i, interestByMonth, interestAcumulated)
 
                 surplus += (cuoteRounded - realCuoteAmount)
 
                 fixedCuote = (i === (loan.num_cuotas - 1)) ? cuoteRounded : roundToCeil(cuoteRounded - surplus, 100)
 
-                console.log(`${cuoteRounded} - ${onDebtMemory} - ${onDebt} - ${interestByMonth}`)
+                addMonthsRatio = (loan.mes_inicial === 'this') ? 0 : 1
+
+                validfrom = moment(loan.fecha_inicial).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
+                validUntil = moment(validfrom).endOf('month').format('YYYY-MM-DD')
+
+                if (i === 0) {
+                    if (loan.mes_inicial === 'this') {
+                        validfrom = moment(loan.fecha_inicial).format('YYYY-MM-DD')
+                    }
+                }
+
                 data.push({
                     id_prestamo: loan_id,
                     monto: fixedCuote,
                     en_deuda_futura: onDebt,
-                    vigencia_desde: '2000-04-06',
-                    vigencia_hasta: '2000-04-06',
+                    vigencia_desde: validfrom,
+                    vigencia_hasta: validUntil,
                     interes: 0,
                     multa: 0,
                     pagado: 0,

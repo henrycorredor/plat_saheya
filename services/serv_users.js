@@ -1,4 +1,6 @@
+require('dotenv').config()
 const MySqlClass = require('../lib/mysql')
+const boom = require('@hapi/boom')
 
 class UserServices {
     constructor() {
@@ -34,6 +36,17 @@ class UserServices {
     async getUserLoans(id) {
         const data = await this.db.getData('prestamos', `deudor_id = ${id}`)
         return data
+    }
+
+    async getUserFreeCapital(num_identificacion) {
+        const data = await this.db.getData('usuarios', `num_identificacion = ${num_identificacion}`, `capital, en_deuda`)
+        if (data) {
+            const { en_deuda, capital } = data[0]
+            const capitalFree = (capital * Number(process.env.FREE_USER_CAPITAL_PERCENT)) / 100
+            return capitalFree - en_deuda
+        } else {
+            throw boom.notFound('inexistent resource')
+        }
     }
 }
 

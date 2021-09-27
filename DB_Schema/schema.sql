@@ -64,6 +64,7 @@ CREATE TABLE `prestamos` (
   `prestamo_id`  int unsigned NOT NULL AUTO_INCREMENT,
   `tipo` tinyint NOT NULL DEFAULT '1',
   `fecha_inicial` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `mes_inicial` enum('this', 'next') DEFAULT 'this',
   `num_cuotas` tinyint NOT NULL,
   `cuotas_pagadas` tinyint NOT NULL DEFAULT '0',
   `deudor_id` int unsigned NOT NULL,

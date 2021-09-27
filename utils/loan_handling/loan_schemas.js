@@ -59,7 +59,11 @@ const ordinarioCuotaFija = {
                         percentageAllowed: 90,
                         cosignerNeeded: false
                 },
-                term: 60
+                term: 60,
+                firstDay: {
+                        noCloserThan: 3,
+                        noFurtherThan: 30
+                }
         },
         warmings: {},
         features: {
@@ -78,6 +82,10 @@ const ordinarioSinCuotaFija = {
                         percentageAllowed: 90,
                         cosignerNeeded: false
                 },
+                firstDay: {
+                        noCloserThan: 3,
+                        noFurtherThan: 30
+                }
 
         },
         warmings: {},
@@ -110,6 +118,10 @@ const extraordinario = {
                         capitalFunds: 'USER_FREE_CAPITAL',
                         percentageAllowed: 90,
                         cosignerNeeded: true
+                },
+                firstDay: {
+                        noCloserThan: 8,
+                        noFurtherThan: 30
                 }
         },
         warmings: {
@@ -151,7 +163,11 @@ const extraExtraordinario = {
                 },
                 term: 60,
                 accountAgeing: 2,
-                actualLoans: 0
+                actualLoans: 0,
+                firstDay: {
+                        noCloserThan: 3,
+                        noFurtherThan: 30
+                }
         },
         warmings: {
                 postApplymentDocs: ['Pagaré e Instructivo firmado por el socio y el coodeudor']

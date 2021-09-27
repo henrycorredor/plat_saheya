@@ -25,11 +25,12 @@ const conditions = {
     },
 
     selfDebtMaxAmount: async function ({ capitalFunds, cosignerNeeded, percentageAllowed }, user_loan_amount) {
+        const freeCapitalVsLoanPercent = await this.getCapitalVsLoanPercent(capitalFunds, user_loan_amount, process.env.USER_ID)
+        const compare = this.compare(percentageAllowed, freeCapitalVsLoanPercent, `El monto supera por ${Math.floor(freeCapitalVsLoanPercent)}% la cantidad permitida para este tipo de préstamo.`)
         if (!cosignerNeeded) {
-            const freeCapitalVsLoanPercent = await this.getCapitalVsLoanPercent(capitalFunds, user_loan_amount, process.env.USER_ID)
-            return this.compare(percentageAllowed, freeCapitalVsLoanPercent, `El monto supera por ${Math.floor(freeCapitalVsLoanPercent)}% la cantidad permitida para este tipo de préstamo.`)
+            return compare
         } else {
-            return [true, 'pass']
+            return (compare[0]) ? [false, 'Este monto puede ser cubierto por el usuario. Puede cambiar la modalidad de préstamo y aplicar sin coodeudores.'] : [true, 'pass']
         }
     },
 
@@ -54,6 +55,18 @@ const conditions = {
         userLoans = await this.db.getData('prestamos', `deudor_id = ${process.env.USER_ID}  AND estado > 5 AND estado < 8`, `count(*) as prestamos`)
 
         return this.compare(schema_loans, userLoans[0].prestamos, 'Actualmente tiene más préstamos vigentes que los permitidos por este tipo de préstamos.')
+    },
+
+    firstDay: async function (schema_data, user_aplication_first_date) {
+        const daysToFistDate = moment(user_aplication_first_date).diff(moment(), 'days')
+
+        const noCloserThan = this.compare(daysToFistDate, schema_data.noCloserThan, 'La fecha inicial más próxima que lo reglamentado.')
+        if (!noCloserThan[0]) return noCloserThan
+
+        const noFurtherThan = this.compare(schema_data.noFurtherThan, daysToFistDate, 'La fecha excede el limite de lo reglamentado')
+        if (!noFurtherThan[0]) return noFurtherThan
+
+        return [true, 'pass']
     }
 }
 
@@ -63,7 +76,8 @@ const val = {
         const comparePairs = {
             term: 'num_cuotas',
             selfDebtMaxAmount: 'monto',
-            cosignersMaxAmount: 'coodeudores'
+            cosignersMaxAmount: 'coodeudores',
+            firstDay: 'fecha_inicial'
         }
 
         const msg = {
@@ -86,7 +100,7 @@ const val = {
 
         // filters parameters are defined in "loan_schemas"
 
-        if (this.filters.selfDebtMaxAmount.cosignerNeeded) {
+        if (this.filters.selfDebtMaxAmount.cosignerNeeded && msg.approval) {
             if (user_loan_aplication.coodeudores.length === 0) {
                 msg.approval = false
                 msg.msg = 'No ha solicitado soporte de coodeudores.'

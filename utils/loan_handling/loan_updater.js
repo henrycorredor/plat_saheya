@@ -47,10 +47,7 @@ const loanUpdater = async function (relationships, loan_id, status, user_id, rol
                 throw boom.badRequest('no resource found')
             } else {
                 const isTheLast = relationships.filter(rels => rels.aprobado === 1)
-                if (isTheLast.length === 1) {
-                    await db.upsert('prestamos', { estado: 4, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
-                    await generateCuotes(loan_id)
-                }
+                if (isTheLast.length === 1) await db.upsert('prestamos', { estado: 4, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
             }
             await db.upsert('relaciones_coodeudores', { aprobado: 3, fecha_aprobacion: currentTimeStamp }, `id_prestamo = ${loan_id} AND id_codeudor = ${user_id} AND rol = ${rol}`)
 
@@ -79,14 +76,16 @@ const loanUpdater = async function (relationships, loan_id, status, user_id, rol
                 let cosignedAmount = 0
 
                 if (cosigners) {
-                    for (let i = 0; i < cosigners.length; i++) {
-                        await db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${cosigners[i].monto_avalado} where usuario_id = ${cosigners[i].id_codeudor}`)
-                        cosignedAmount += Number(cosigners[i].monto_avalado)
-                    }
+                    const updateCosigners = cosigners.map(async cosigner => {
+                        await db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${cosigner.monto_avalado} where usuario_id = ${cosigner.id_codeudor}`)
+                        cosignedAmount += Number(cosigner.monto_avalado)
+                    })
+                    await Promise.all(updateCosigners)
                 }
 
                 const selfSupported = Number(loanInfo.monto) - cosignedAmount
                 await db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${selfSupported} where usuario_id = ${loanInfo.deudor_id}`)
+                await generateCuotes(loan_id)
             } else {
                 throw boom.badRequest('Wrong request')
             }

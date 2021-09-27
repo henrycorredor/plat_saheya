@@ -88,6 +88,23 @@ router.get('/:usuario_id/loan', validationHandler(userIdSchema, 'params'), async
     }
 })
 
+router.get('/:num_identificacion/free_capital', async (req, res, next) => {
+    try {
+        const data = await services.getUserFreeCapital(req.params.num_identificacion)
+        if (data || data === 0) {
+            res.json({
+                message: `User identified with number ${req.params.num_identificacion} free capital`,
+                statusCode: '200',
+                data: data
+            })
+        } else {
+            next(boom.notFound('Inexistent resource'))
+        }
+    } catch (error) {
+        next(error)
+    }
+})
+
 router.delete('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
         const data = await services.deleteUser(req.params.usuario_id)
