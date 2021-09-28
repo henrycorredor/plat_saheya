@@ -105,6 +105,10 @@ router.get('/:num_identificacion/free_capital', async (req, res, next) => {
     }
 })
 
+router.get(':usedId/payments', async(req,res,next)=>{
+    res.send('hola pecuecas')
+})
+
 router.delete('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
     try {
         const data = await services.deleteUser(req.params.usuario_id)

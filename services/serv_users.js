@@ -48,6 +48,15 @@ class UserServices {
             throw boom.notFound('inexistent resource')
         }
     }
+
+    async getUserPayments(user_id) {
+        const data = await this.db.getData('transacciones', `usuario_id = ${user_id}`)
+        if (data) {
+            return data
+        } else {
+            throw boom.notFound('inexistent resource')
+        }
+    }
 }
 
 module.exports = UserServices
