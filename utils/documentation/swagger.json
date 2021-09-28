@@ -178,6 +178,36 @@
         }
       }
     },
+    "/user/{userIdDocumentNumber}/free_capital": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "parameters": [
+          {
+            "name": "userIdDocumentNumber",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "summary": "Get free capital able from actual user",
+        "description": "For privacy reasons, in this case user ID is not used but the actual user ID national document.",
+        "operationId": "getUserFreeCapital",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Free user capital",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
     "/loan": {
       "get": {
         "tags": [
@@ -390,6 +420,37 @@
           }
         }
       }
+    },
+    "/payment/{userId}": {
+      "get": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "User list",
+        "description": "User list. Only for admin staff",
+        "operationId": "getPayment",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User list",
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -524,6 +585,35 @@
           "format": "int64"
         },
         "further_action": {
+          "type": "string"
+        }
+      }
+    },
+    "Payment": {
+      "type": "object",
+      "properties": {
+        "transaccion_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "usuario_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "fecha_realizacion": {
+          "type": "string"
+        },
+        "fecha_registro": {
+          "type": "string"
+        },
+        "monto": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "motivo": {
+          "type": "string"
+        },
+        "comentario": {
           "type": "string"
         }
       }

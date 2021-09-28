@@ -117,6 +117,25 @@ class LoanServices {
             throw boom.notFound('inexistent resource')
         }
     }
+
+    async getLoanCuotes(loan_id) {
+        const cuotes = await this.db.getData('cuotas', `id_prestamo = ${loan_id}`)
+        if (cuotes) {
+            return cuotes
+        } else {
+            throw boom.notFound('inexistent resource')
+        }
+    }
+
+    async getCuote(cuote_id) {
+        const cuote = await this.db.getData('cuotas', `cuota_id = ${cuote_id}`)
+        console.log(cuote_id, cuote)
+        if (cuote) {
+            return cuote[0]
+        } else {
+            throw boom.notFound('inexistent resource')
+        }
+    }
 }
 
 module.exports = LoanServices

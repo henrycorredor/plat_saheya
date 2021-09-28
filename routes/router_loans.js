@@ -71,19 +71,29 @@ router.put('/:loandId', validationHandler(updateLoanStatus, 'body'), async (req,
 })
 
 router.get('/:loanId/cuote', async (req, res, next) => {
-    res.json({
-        message: `Cuote list for ${req.params.loanId}`,
-        statusCode: '200',
-        data: 'miau'
-    })
+    try {
+        const result = await services.getLoanCuotes(req.params.loanId)
+        res.json({
+            message: `Cuote list for ${req.params.loanId}`,
+            statusCode: '200',
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
 })
 
 router.get('/:loanId/cuote/:cuoteId', async (req, res, next) => {
-    res.json({
-        message: `Cuote id ${req.params.cuoteId} for ${req.params.loanId}`,
-        statusCode: '200',
-        data: 'miau'
-    })
+    try {
+        const result = await services.getCuote(req.params.cuoteId)
+        res.json({
+            message: `Cuote id ${req.params.cuoteId} for ${req.params.cuoteId}`,
+            statusCode: '200',
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
 })
 
 router.put('/:loanId/cuote/:cuoteId', async (req, res, next) => {

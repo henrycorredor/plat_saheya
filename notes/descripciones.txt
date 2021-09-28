@@ -37,3 +37,11 @@ Roles de usuarios
 3 - Tesorero
 4 - Presidente
 5 - Fiscal
+
+
+Estados de las cuotas
+
+1 - Espera
+2 - Vigente
+3 - Pagado
+4 - Vencida

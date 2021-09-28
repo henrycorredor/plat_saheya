@@ -184,6 +184,7 @@ DROP TABLE IF EXISTS `cuotas`;
 CREATE TABLE `cuotas` (
   `cuota_id` int unsigned NOT NULL AUTO_INCREMENT,
   `id_prestamo`  int unsigned NOT NULL,
+  `cuota_num` tinyint NOT NULL,
   `monto` int unsigned NOT NULL,
   `en_deuda_futura` int unsigned NOT NULL,
   `vigencia_desde` date NOT NULL,
@@ -192,6 +193,8 @@ CREATE TABLE `cuotas` (
   `multa` int unsigned NOT NULL,
   `pagado` int unsigned NOT NULL DEFAULT '0',
   `en_deuda` int unsigned NOT NULL,
+  `fecha_pago` date NULL DEFAULT NULL,
+  `estado` tinyint NOT NULL DEFAULT '1'
   PRIMARY KEY (`cuota_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
