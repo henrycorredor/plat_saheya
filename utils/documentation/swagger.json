@@ -208,6 +208,37 @@
         }
       }
     },
+    "/user/{userId}/payments": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "User list",
+        "description": "User payments list. Only for admin and self use",
+        "operationId": "getPayment",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ID",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "User list",
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        }
+      }
+    },
     "/loan": {
       "get": {
         "tags": [
@@ -379,27 +410,69 @@
             }
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/payment/": {
+      "get": {
         "tags": [
-          "loans"
+          "payments"
         ],
-        "summary": "Confirm cuote payment",
-        "description": "Use this method to pay a cuote and decide what to do if action required",
-        "operationId": "updateCuote",
+        "summary": "List all payments",
+        "description": "List all payments done to date.",
+        "operationId": "getPayments",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments list",
+            "schema": {
+              "$ref": "#/definitions/Payment"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Set a payment",
+        "description": "Gets from Body all the data to set a new payment.",
+        "operationId": "setPayment",
         "parameters": [
           {
-            "name": "loanId",
-            "in": "path",
-            "description": "ID cuote's loan",
+            "in": "body",
+            "name": "body",
+            "description": "new information to update",
             "required": true,
-            "type": "integer",
-            "format": "int64"
-          },
+            "schema": {
+              "$ref": "#/definitions/SetPayment"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Payment setted"
+          }
+        }
+      }
+    },
+    "/payment/{paymentId}": {
+      "put": {
+        "tags": [
+          "payments"
+        ],
+        "summary": "Confirm cuote payment",
+        "description": "Accept or reject a payment.",
+        "operationId": "updatePayment",
+        "parameters": [
           {
-            "name": "cuoteId",
+            "name": "paymentId",
             "in": "path",
-            "description": "Cuote ID",
+            "description": "Payment transaction ID",
             "required": true,
             "type": "integer",
             "format": "int64"
@@ -410,44 +483,21 @@
             "description": "tells how much was payed, and action to update the rest of the cuotes.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/UpdateCuote"
+              "type": "object",
+              "properties": {
+                "payment_id": {
+                  "type": "number"
+                },
+                "action": {
+                  "type": "boolean"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Cuote updated."
-          }
-        }
-      }
-    },
-    "/payment/{userId}": {
-      "get": {
-        "tags": [
-          "payments"
-        ],
-        "summary": "User list",
-        "description": "User list. Only for admin staff",
-        "operationId": "getPayment",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "description": "user ID",
-            "required": true,
-            "type": "integer",
-            "format": "int64"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "User list",
-            "schema": {
-              "$ref": "#/definitions/Payment"
-            }
+            "description": "Payment updated."
           }
         }
       }
@@ -615,6 +665,35 @@
         },
         "comentario": {
           "type": "string"
+        }
+      }
+    },
+    "SetPayment": {
+      "type": "object",
+      "properties": {
+        "user_from": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "user_to": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "transactions": {
+          "type": "object",
+          "properties": {
+            "aim": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         }
       }
     }

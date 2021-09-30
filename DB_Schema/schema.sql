@@ -106,11 +106,12 @@ DROP TABLE IF EXISTS `transacciones`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transacciones` (
   `transaccion_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `usuario_id` int unsigned NOT NULL,
   `fecha_realizacion` date NOT NULL,
   `fecha_registro` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `monto` int NOT NULL,
-  `motivo` tinyint(1) NOT NULL,
+  `emisor` int NOT NULL,
+  `destinatario` int NOT NULL,
+  `estado` tinyint NOT NULL DEFAULT '1',
   `comentario` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   PRIMARY KEY (`transaccion_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT DEFAULT CHARSET=utf8;
@@ -125,9 +126,8 @@ DROP TABLE IF EXISTS `transacciones_abonos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transacciones_abonos` (
   `abono_id` int NOT NULL AUTO_INCREMENT,
-  `usuario_id` int NOT NULL,
+  `transaccion_id` int NOT NULL,
   `monto` int NOT NULL,
-  `comentario` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`abono_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -141,19 +141,17 @@ DROP TABLE IF EXISTS `transacciones_prestamos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transacciones_prestamos` (
   `id_transaccion` int unsigned NOT NULL AUTO_INCREMENT,
-  `monto_total` int unsigned NOT NULL,
+  `pago_id` int not null,
   `prestamo_id` int unsigned NOT NULL,
+  `cuota_numero` tinyint NOT NULL DEFAULT '0',
+  `monto_total` int unsigned NOT NULL,
+  `abono` int unsigned NOT NULL,
+  `interes` int unsigned NOT NULL,
   `fecha_realizacion` date NOT NULL,
   `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `cuota_numero` tinyint NOT NULL DEFAULT '0',
-  `cuotas_restantes` tinyint NOT NULL,
-  `interes` int unsigned NOT NULL,
-  `abono` int unsigned NOT NULL,
-  `por_pagar` int unsigned NOT NULL,
   PRIMARY KEY (`id_transaccion`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Table structure for table `usuarios`
 --

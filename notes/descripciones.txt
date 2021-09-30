@@ -39,9 +39,16 @@ Roles de usuarios
 5 - Fiscal
 
 
-Estados de las cuotas
+Estados de las cuotas de los prestamos
 
 1 - Espera
 2 - Vigente
 3 - Pagado
 4 - Vencida
+
+
+Estados de los pagos
+
+1 - Realizado, en espera de aprobacion
+2 - Rechazado
+3 - Aprobado
