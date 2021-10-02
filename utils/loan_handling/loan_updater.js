@@ -83,9 +83,10 @@ const loanUpdater = async function (relationships, loan_id, status, user_id, rol
                     await Promise.all(updateCosigners)
                 }
 
+                await generateCuotes(loan_id)
+                
                 const selfSupported = Number(loanInfo.monto) - cosignedAmount
                 await db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda + ${selfSupported} where usuario_id = ${loanInfo.deudor_id}`)
-                await generateCuotes(loan_id)
             } else {
                 throw boom.badRequest('Wrong request')
             }
@@ -112,6 +113,21 @@ const loanUpdater = async function (relationships, loan_id, status, user_id, rol
             if (loanStatusCase6.estado === 5 || loanStatusCase6.estado === 7) {
                 const status = (loanStatusCase6.estado === 5) ? 6 : 8
                 await db.upsert('prestamos', { estado: status, ultima_actualizacion: currentTimeStamp }, `prestamo_id = ${loan_id}`)
+                const [loanData] = await db.getData('prestamos',`prestamo_id = ${loan_id}`, )
+//                 if(status === 6){
+//                     const transaction = await db.upsert('transacciones', {
+//                         fecha_realizacion: currentTimeStamp,
+//                         monto
+//                     }) 
+
+
+
+// | emisor            | int          | NO   |     | NULL              |                   |
+// | destinatario      | int          | NO   |     | NULL              |                   |
+// | estado    
+//                 }else{
+
+//                 }
             } else {
                 throw boom.badRequest('no resource found')
             }

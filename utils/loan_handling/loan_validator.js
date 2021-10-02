@@ -26,8 +26,12 @@ const conditions = {
     },
 
     selfDebtMaxAmount: async function ({ capitalFunds, cosignerNeeded, percentageAllowed }, user_loan_amount) {
-        const freeCapitalVsLoanPercent = await this.getCapitalVsLoanPercent(capitalFunds, user_loan_amount, process.env.USER_ID)
-        const compare = this.compare(percentageAllowed, freeCapitalVsLoanPercent, `El monto supera por ${Math.floor(freeCapitalVsLoanPercent)}% la cantidad permitida para este tipo de préstamo.`)
+        let availableCapital = 0
+        if (capitalFunds === 'USER_FREE_CAPITAL') {
+            const [userInfo] = await this.db.getData('usuarios', `usuario_id = ${process.env.USER_ID}`, `capital, en_deuda`)
+            availableCapital = ((userInfo.capital * percentageAllowed) / 100) - userInfo.en_deuda
+        }
+        const compare = this.compare(availableCapital, user_loan_amount, `El monto supera la cantidad permitida para este tipo de préstamo.`)
         if (!cosignerNeeded) {
             return compare
         } else {
@@ -42,7 +46,7 @@ const conditions = {
             for (i = 0; i < cosigners_array.length; i++) {
                 [userInfo] = await this.db.getData('usuarios', `usuario_id = ${cosigners_array[i].id_codeudor}`, `capital, en_deuda`)
                 freeCapital = ((Number(userInfo.capital) * percentageAllowed) / 100) - Number(userInfo.en_deuda)
-                
+
                 if (freeCapital < cosigners_array[i].monto_avalado) {
                     return [false, `El coodeudor '${cosigners_array[i].id_codeudor}' excede el monto de su capital libre.`]
                 }

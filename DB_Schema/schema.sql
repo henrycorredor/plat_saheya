@@ -30,11 +30,13 @@ DROP TABLE IF EXISTS `capital`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `capital` (
   `mov_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `total_actual` int unsigned NOT NULL,
-  `total_anterior` int unsigned NOT NULL,
-  `motivo_movimiento` tinyint(1) NOT NULL,
-  `transaccion_id` int unsigned NOT NULL,
   `monto` int NOT NULL,
+  `total_activo_actual` int unsigned NOT NULL,
+  `total_activo_anterior` int unsigned NOT NULL,
+  `total_pasivo_actual` int unsigned NOT NULL,
+  `total_pasivo_anterior` int unsigned NOT NULL,
+  `transaccion_id` int unsigned NOT NULL,
+  `administrador` int NOT NULL,
   PRIMARY KEY (`mov_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -110,6 +112,7 @@ CREATE TABLE `transacciones` (
   `fecha_registro` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `monto` int NOT NULL,
   `emisor` int NOT NULL,
+  `rol_emisor` tinyint NOT NULL DEFAULT '1',
   `destinatario` int NOT NULL,
   `estado` tinyint NOT NULL DEFAULT '1',
   `comentario` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
@@ -128,6 +131,7 @@ CREATE TABLE `transacciones_abonos` (
   `abono_id` int NOT NULL AUTO_INCREMENT,
   `transaccion_id` int NOT NULL,
   `monto` int NOT NULL,
+  `estado` tinyint default '1',
   PRIMARY KEY (`abono_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -192,7 +196,8 @@ CREATE TABLE `cuotas` (
   `pagado` int unsigned NOT NULL DEFAULT '0',
   `en_deuda` int unsigned NOT NULL,
   `fecha_pago` date NULL DEFAULT NULL,
-  `estado` tinyint NOT NULL DEFAULT '1'
+  `estado` tinyint NOT NULL DEFAULT '1',
+  `id_transaccion` int DEFAULT NULL,
   PRIMARY KEY (`cuota_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

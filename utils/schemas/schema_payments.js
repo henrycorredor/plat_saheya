@@ -1,9 +1,5 @@
 const joi = require('@hapi/joi')
 
-const updatePaymentSchema = joi.object({
-
-})
-
 const setPaymentSchema = joi.object({
     emisor: joi.number().required(),
     fecha_realizacion: joi.date().required(),
@@ -11,7 +7,7 @@ const setPaymentSchema = joi.object({
     comentario: joi.string(),
     destinatario: joi.number().required(),
     transacciones: joi.array().items(joi.object({
-        motivo: joi.string().valid('prestamo', 'abono'),
+        motivo: joi.string().valid('prestamo', 'abono').required(),
         datos: joi.alternatives().conditional('motivo', {
             is: 'prestamo',
             then: joi.object({
@@ -26,7 +22,11 @@ const setPaymentSchema = joi.object({
                 monto: joi.number().required()
             })
         }).required()
-    }))
+    }).required()).required()
 })
 
-module.exports = { setPaymentSchema }
+const updatePaymentSchema = joi.object({
+    estado: joi.number().valid(1, 2, 3).required()
+})
+
+module.exports = { setPaymentSchema, updatePaymentSchema }
