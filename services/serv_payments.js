@@ -54,8 +54,6 @@ class PaymentService {
     async updatePayment(payment_id, update_data) {
         if (update_data.estado === 2) {
             await this.db.upsert('transacciones', { estado: 2 }, `transaccion_id = ${payment_id}`)
-            await this.db.upsert('transacciones_abonos', { estado: 2 }, `transaccion_id = ${payment_id}`)
-            await this.db.upsert('transacciones_prestamos', { estado: 2 }, `pago_id = ${payment_id}`)
         } else if (update_data.estado === 3) {
             const [transactionInfo] = await this.db.getData('transacciones', `transaccion_id = ${payment_id}`, "emisor, destinatario, estado, monto")
 
@@ -72,7 +70,6 @@ class PaymentService {
             if (suscription) {
                 addCapital = suscription.monto
                 await this.db.doQuery(`UPDATE usuarios SET capital = capital + ${suscription.monto} WHERE usuario_id = ${transactionInfo.emisor}`)
-                await this.db.upsert('transacciones_abonos', { estado: 3 }, `transaccion_id = ${payment_id}`)
             }
 
             const loan_payment = await this.db.getData('transacciones_prestamos', `pago_id = ${payment_id}`)
@@ -90,6 +87,8 @@ class PaymentService {
                     total_pasivo_actual: 0,
                     total_pasivo_anterior: 0
                 }
+            } else {
+                capital = capital[0]
             }
             await this.db.upsert('capital', {
                 total_activo_actual: capital.total_activo_actual + addCapital,

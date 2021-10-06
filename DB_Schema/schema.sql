@@ -131,7 +131,6 @@ CREATE TABLE `transacciones_abonos` (
   `abono_id` int NOT NULL AUTO_INCREMENT,
   `transaccion_id` int NOT NULL,
   `monto` int NOT NULL,
-  `estado` tinyint default '1',
   PRIMARY KEY (`abono_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -150,9 +149,7 @@ CREATE TABLE `transacciones_prestamos` (
   `cuota_numero` tinyint NOT NULL DEFAULT '0',
   `monto_total` int unsigned NOT NULL,
   `abono` int unsigned NOT NULL,
-  `interes` int unsigned NOT NULL,
-  `fecha_realizacion` date NOT NULL,
-  `fecha_registro` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `interes` int unsigned NOT NULL
   PRIMARY KEY (`id_transaccion`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -175,6 +172,7 @@ CREATE TABLE `usuarios` (
   `rol` tinyint(1) NOT NULL DEFAULT '1',
   `capital` int NOT NULL DEFAULT '0',
   `en_deuda` int NOT NULL DEFAULT '0',
+  `capital_congelado` tinyint NOT NULL DEFAULT '0'
   PRIMARY KEY (`usuario_id`),
   UNIQUE KEY `num_identificacion` (`num_identificacion`),
   UNIQUE KEY `telefono_ppal` (`telefono_ppal`)
@@ -187,7 +185,7 @@ CREATE TABLE `cuotas` (
   `cuota_id` int unsigned NOT NULL AUTO_INCREMENT,
   `id_prestamo`  int unsigned NOT NULL,
   `cuota_num` tinyint NOT NULL,
-  `monto` int unsigned NOT NULL,
+  `monto` int NOT NULL,
   `en_deuda_futura` int unsigned NOT NULL,
   `vigencia_desde` date NOT NULL,
   `vigencia_hasta` date NOT NULL,

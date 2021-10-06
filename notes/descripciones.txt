@@ -47,7 +47,7 @@ Estados de las cuotas de los prestamos
 4 - Vencida
 
 
-Estados de los pagos
+Estados de las transacciones
 
 1 - Realizado, en espera de aprobacion
 2 - Rechazado

@@ -53,6 +53,7 @@ class LoanServices {
 
             delete data.coodeudores
 
+            await this.db.upsert('usuarios', { capital_congelado: 1 }, `usuario_id = ${data.deudor_id}`)
             const setLoanQuery = await this.db.upsert('prestamos', data)
 
             result.loanId = setLoanQuery.insertId
@@ -64,6 +65,7 @@ class LoanServices {
                     monto_avalado: cosigner.monto_avalado,
                     orden: index
                 })
+                await this.db.upsert('usuarios', { capital_congelado: 1 }, `usuario_id = ${cosigner.id_codeudor}`)
             })
             await Promise.all(setCosigners)
 

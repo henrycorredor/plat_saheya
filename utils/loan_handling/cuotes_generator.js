@@ -30,7 +30,19 @@ const cuotesGenerator = async function (loan_id) {
 
     switch (loanSchema.features.cuoteType) {
         case 'MONTH_FIXED_CUOTE':
-            const data = []
+            const data = [{
+                id_prestamo: loan_id,
+                cuota_num: 0,
+                monto: loan.monto,
+                en_deuda_futura: loan.monto,
+                vigencia_desde: moment().format('YYYY-MM-DD'),
+                vigencia_hasta: moment(loan.fecha_inicial).format('YYYY-MM-DD'),
+                interes: 0,
+                multa: 0,
+                pagado: 0,
+                en_deuda: 0,
+                estado: 2
+            }]
 
             let fixedCuote = 0
             let surplus = 0
@@ -90,7 +102,9 @@ const cuotesGenerator = async function (loan_id) {
             const fixedInterest = roundToCeil(interestAcumulated / loan.num_cuotas, 100)
 
             const insertCuotes = data.map(async cuote => {
-                cuote.interes = fixedInterest
+                if (cuote.cuota_num !== 0) {
+                    cuote.interes = fixedInterest
+                }
                 await db.upsert('cuotas', cuote)
             })
 
@@ -123,6 +137,22 @@ const cuotesGenerator = async function (loan_id) {
                 } else {
                     cuote = 0
                     onDebt = loan.monto
+                }
+
+                if (i === 0) {
+                    await db.upsert('cuotas', {
+                        id_prestamo: loan_id,
+                        monto: loan.monto,
+                        cuota_num: i,
+                        en_deuda_futura: loan.monto,
+                        vigencia_desde: moment().format('YYYY-MM-DD'),
+                        vigencia_hasta: loan.fecha_inicial,
+                        interes: 0,
+                        multa: 0,
+                        pagado: 0,
+                        en_deuda: loan.monto,
+                        estado: 2
+                    })
                 }
 
                 await db.upsert('cuotas', {
