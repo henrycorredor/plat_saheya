@@ -1,6 +1,7 @@
 require('dotenv').config()
 const MySqlClass = require('../lib/mysql')
 const boom = require('@hapi/boom')
+const bcrypt = require('bcrypt')
 
 class UserServices {
     constructor() {
@@ -23,8 +24,20 @@ class UserServices {
     }
 
     async editUser(id, data) {
-        const result = await this.db.upsert('usuarios', data, `usuario_id = ${id}`)
-        return result
+        if (data.password) {
+            const hashPassword = await bcrypt.hash(data.password, 8)
+            delete data.password
+            const actualPass = await this.db.getData('contrasenias', `id = ${id}`)
+            if(actualPass.length>0){
+                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword }, `id = ${id}`)
+            }else{
+                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword })
+            }
+        }
+        if (data.length < 0) {
+            const result = await this.db.upsert('usuarios', data, `usuario_id = ${id}`)
+        }
+        return true
     }
 
     async deleteUser(id) {

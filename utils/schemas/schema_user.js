@@ -22,7 +22,8 @@ const editUserSchema = joi.object({
     fecha_nacimiento: joi.date(),
     telefono_ppal: joi.number(),
     rol: joi.number().min(1).max(5),
-    email: joi.string().email()
+    email: joi.string().email(),
+    password: joi.string()
 })
 
 

@@ -54,7 +54,7 @@ router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req
 router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validationHandler(editUserSchema), async (req, res, next) => {
     try {
         const result = await services.editUser(req.params.usuario_id, req.body)
-        if (result.affectedRows > 0) {
+        if (result) {
             res.json({
                 message: 'User edited',
                 statusCode: '200',
