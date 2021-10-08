@@ -76,7 +76,7 @@ CREATE TABLE `prestamos` (
   `ultima_actualizacion` DATE NULL DEFAULT NULL,
   `pagado` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`prestamo_id`)
-) ENGINE=InnoDB AUTO_INCREMENT DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,7 +117,7 @@ CREATE TABLE `transacciones` (
   `estado` tinyint NOT NULL DEFAULT '1',
   `comentario` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   PRIMARY KEY (`transaccion_id`)
-) ENGINE=MyISAM AUTO_INCREMENT DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,9 +149,9 @@ CREATE TABLE `transacciones_prestamos` (
   `cuota_numero` tinyint NOT NULL DEFAULT '0',
   `monto_total` int unsigned NOT NULL,
   `abono` int unsigned NOT NULL,
-  `interes` int unsigned NOT NULL
+  `interes` int unsigned NOT NULL,
   PRIMARY KEY (`id_transaccion`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 --
 -- Table structure for table `usuarios`
@@ -172,11 +172,11 @@ CREATE TABLE `usuarios` (
   `rol` tinyint(1) NOT NULL DEFAULT '1',
   `capital` int NOT NULL DEFAULT '0',
   `en_deuda` int NOT NULL DEFAULT '0',
-  `capital_congelado` tinyint NOT NULL DEFAULT '0'
+  `capital_congelado` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`usuario_id`),
-  UNIQUE KEY `num_identificacion` (`num_identificacion`),
-  UNIQUE KEY `telefono_ppal` (`telefono_ppal`)
-) ENGINE=InnoDB AUTO_INCREMENT DEFAULT CHARSET=utf8;
+  UNIQUE KEY (`num_identificacion`),
+  UNIQUE KEY (`telefono_ppal`)
+) ENGINE=InnoDB CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -197,7 +197,7 @@ CREATE TABLE `cuotas` (
   `estado` tinyint NOT NULL DEFAULT '1',
   `id_transaccion` int DEFAULT NULL,
   PRIMARY KEY (`cuota_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

@@ -1,40 +1,24 @@
 const router = require('express').Router()
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
 const boom = require('@hapi/boom')
+
+const Service = require('../services/serv_auth')
+const service = new Service()
 
 require('dotenv').config()
 
-const MySqlClass = require('../lib/mysql')
-const db = new MySqlClass()
+//const MySqlClass = require('../lib/mysql')
+//const db = new MySqlClass()
+const db = require('../lib/mysql')
 
 router.post('/login', async (req, res, next) => {
     try {
         const { identificacion, contrasenia } = req.body
-        const dbUserData = await db.doQuery(
-            `SELECT usuarios.usuario_id, usuarios.rol, contrasenias.contrasenia
-            FROM usuarios
-            JOIN contrasenias ON usuarios.num_identificacion = ${identificacion} AND contrasenias.id = usuarios.usuario_id`)
-
-        if (!dbUserData) {
-            throw boom.unauthorized('Wrong credentials')
-        } else {
-            const match = await bcrypt.compare(contrasenia, dbUserData[0].contrasenia)
-            if (match) {
-                const payload = {
-                    id: dbUserData[0].usuario_id,
-                    rol: dbUserData[0].rol
-                }
-                const bearer = await jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 days' })
-                res.json({
-                    message: `Wellcome!`,
-                    statusCode: '200',
-                    data: bearer
-                })
-            } else {
-                throw boom.unauthorized('Wrong credentials')
-            }
-        }
+        const bearer = await service.login(identificacion, contrasenia)
+        res.json({
+            message: `Wellcome!`,
+            statusCode: '200',
+            data: bearer
+        })
     } catch (error) {
         next(error)
     }

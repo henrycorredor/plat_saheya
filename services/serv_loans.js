@@ -11,7 +11,7 @@ const [
 
 class LoanServices {
     constructor() {
-        this.db = new MySqlClass()
+        this.db = MySqlClass
     }
 
     async getAllLoans() {

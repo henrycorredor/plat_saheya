@@ -1,14 +1,17 @@
 const express = require('express')
 const router = express.Router()
-
 const boom = require('@hapi/boom')
+
 const validationHandler = require('../utils/middlewares/validation_handler')
 const { userIdSchema, createUserSchema, editUserSchema } = require('../utils/schemas/schema_user')
-const Services = require('../services/serv_users')
 
+const Services = require('../services/serv_users')
 const services = new Services()
 
-router.get('/', async (req, res, next) => {
+const passport = require('passport')
+
+router.get('/', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+    console.log(req.user)
     try {
         const users = await services.getAllUsers()
         res.json({
@@ -105,7 +108,7 @@ router.get('/:num_identificacion/free_capital', async (req, res, next) => {
     }
 })
 
-router.get(':usedId/payments', async(req,res,next)=>{
+router.get(':usedId/payments', async (req, res, next) => {
     res.send('hola pecuecas')
 })
 

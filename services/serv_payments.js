@@ -4,7 +4,7 @@ const MySqlClass = require('../lib/mysql')
 
 class PaymentService {
     constructor() {
-        this.db = new MySqlClass()
+        this.db = MySqlClass
     }
 
     async listPayments() {

@@ -4,7 +4,7 @@ const cosignersInspector = require('./cosigners_inspector')
 const MySqlClass = require('../../lib/mysql')
 
 const conditions = {
-    db: new MySqlClass(),
+    db: MySqlClass,
 
     compare: (more, less, msg) => (more >= less) ? [true, 'pass'] : [false, msg],
 

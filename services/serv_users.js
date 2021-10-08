@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt')
 
 class UserServices {
     constructor() {
-        this.db = new MySqlClass()
+        this.db = MySqlClass
     }
 
     async getAllUsers() {
@@ -28,10 +28,10 @@ class UserServices {
             const hashPassword = await bcrypt.hash(data.password, 8)
             delete data.password
             const actualPass = await this.db.getData('contrasenias', `id = ${id}`)
-            if(actualPass.length>0){
-                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword }, `id = ${id}`)
-            }else{
+            if (!actualPass) {
                 await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword })
+            } else {
+                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword }, `id = ${id}`)
             }
         }
         if (data.length < 0) {
