@@ -1,6 +1,7 @@
 const config = require('../config')
 const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
+const argon2 = require('argon2')
+const boom = require('@hapi/boom')
 const MySqlClass = require('../lib/mysql')
 
 class auth {
@@ -11,17 +12,16 @@ class auth {
     async login(identificacion, contrasenia) {
 
         const dbUserData = await this.db.doQuery(
-            `SELECT usuarios.usuario_id, usuarios.rol, contrasenias.contrasenia
-            FROM usuarios
-            JOIN contrasenias ON usuarios.num_identificacion = ${identificacion} AND contrasenias.id = usuarios.usuario_id`)
-
+            `SELECT users.id, users.rol, passwords.password
+            FROM users
+            JOIN passwords ON users.id_document_number = ${identificacion} AND passwords.user_id = users.id`)
         if (!dbUserData) {
             throw boom.unauthorized('Wrong credentials')
         } else {
-            const match = await bcrypt.compare(contrasenia, dbUserData[0].contrasenia)
+            const match = await argon2.verify(dbUserData[0].password, contrasenia)
             if (match) {
                 const payload = {
-                    id: dbUserData[0].usuario_id,
+                    id: dbUserData[0].id,
                     rol: dbUserData[0].rol
                 }
                 return await jwt.sign(payload, config.jwtSecret, { expiresIn: '5 days' })

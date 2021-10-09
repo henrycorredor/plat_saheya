@@ -10,45 +10,64 @@ Tipos de préstamos:
 Estados de los préstamos:
 
 1 - solicitado - esperando aprobación
+        - 1-waiting
+
 2 - rechazado
+        - 2-rejected
+
 3 - en espera de aprobacion de admin y codeudores
+        - 3-waiting-approval
+
 4 - aprobado, esperando documentos de soporte
+        - 4-waiting-supports
+
 5 - aprobado, esperando desembolso
+        - 5-waiting-disbursement
+
 6 - desembolso confirmado usuario, préstamo en proceso
+        - 6-user-confirm-disbursement
+
 7 - desembolso confirmado tesorería, préstamo en proceso
+        - 7-treasurer-confirm-disbursement
+
 8 - desembolso confirmado ambas partes, préstamo en proceso
+        - 8-both-sides-confirmed
+
 9 - prestamo pagado
+        - 9-full-payed-loan
+
 10 - congelado
+        - 10-frozen
 
 
 
 Estados de coorelaciones de coodeudores:
 
-1 - en espera de aprobacion
-2 - rechazado
-3 - aprobado
+1 - en espera de aprobacion - 1-waiting
+2 - rechazado               - 2-rejected
+3 - aprobado                - 3-approved
 
 
 
 Roles de usuarios
 
-1 - Normal
-2 - Super Usuario
-3 - Tesorero
-4 - Presidente
-5 - Fiscal
+1 - Normal          - 1-normal
+2 - Super Usuario   - 2-super-user
+3 - Tesorero        - 3-treasurer
+4 - Presidente      - 4-president
+5 - Fiscal          - 5-fiscal
 
 
 Estados de las cuotas de los prestamos
 
-1 - Espera
-2 - Vigente
-3 - Pagado
-4 - Vencida
+1 - Espera      - 1-waiting
+2 - Vigente     - 2-active
+3 - Pagado      - 3-payed
+4 - Vencida     - 4-overdue
 
 
 Estados de las transacciones
 
-1 - Realizado, en espera de aprobacion
-2 - Rechazado
-3 - Aprobado
+1 - Realizado, en espera de aprobacion      - 1-waiting
+2 - Rechazado                               - 2-rejected
+3 - Aprobado                                - 3-approved

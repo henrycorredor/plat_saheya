@@ -1,71 +1,80 @@
 require('dotenv').config()
 const MySqlClass = require('../lib/mysql')
 const boom = require('@hapi/boom')
-const bcrypt = require('bcrypt')
+const argon2 = require('argon2')
 
 class UserServices {
     constructor() {
         this.db = MySqlClass
     }
 
+    async setPassword(user_id, password) {
+        console.log('eltra a la funcion')
+        const hashPassword = await argon2.hash(password)
+        const prevPassword = await this.db.getData('passwords', `user_id = ${user_id}`)
+        console.log(prevPassword)
+        if (prevPassword) {
+            await this.db.upsert('passwords', { user_id: user_id, password: hashPassword }, `user_id = ${user_id}`)
+        } else {
+            await this.db.upsert('passwords', { user_id: user_id, password: hashPassword })
+        }
+        console.log('termina la funcion')
+    }
+
     async getAllUsers() {
-        const datos = await this.db.getData('usuarios')
-        return datos
+        const usersList = await this.db.getData('users')
+        return usersList
     }
 
     async createUser(data) {
-        const result = await this.db.upsert('usuarios', data)
-        return result
+        console.log('aca entra')
+        const pswdlessData = { ...data }
+        delete pswdlessData.password
+        console.log(pswdlessData, data)
+        const userCreated = await this.db.upsert('users', pswdlessData)
+        if (data.password) {
+            console.log('entra al if')
+            await this.setPassword(userCreated.insertId, data.password)
+        }
+        return { newUserId: userCreated.insertId }
     }
 
     async getUser(id) {
-        const user = await this.db.getData('usuarios', `usuario_id = ${id}`)
+        const user = await this.db.getData('users', `id = ${id}`)
         return user
     }
 
     async editUser(id, data) {
         if (data.password) {
-            const hashPassword = await bcrypt.hash(data.password, 8)
+            await this.setPassword(id, data.password)
             delete data.password
-            const actualPass = await this.db.getData('contrasenias', `id = ${id}`)
-            if (!actualPass) {
-                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword })
-            } else {
-                await this.db.upsert('contrasenias', { id: id, contrasenia: hashPassword }, `id = ${id}`)
-            }
         }
         if (data.length < 0) {
-            const result = await this.db.upsert('usuarios', data, `usuario_id = ${id}`)
+            await this.db.upsert('users', data, `id = ${id}`)
         }
         return true
     }
 
-    async deleteUser(id) {
-        const userInfo = await this.getUser(id)
-        const result = await this.db.delete('usuarios', `usuario_id = ${id}`)
-        return [userInfo, result]
-    }
-
     async getUserLoans(id) {
-        const data = await this.db.getData('prestamos', `deudor_id = ${id}`)
-        return data
+        const loans = await this.db.getData('loans', `debtor_id = ${id}`)
+        return loans
     }
 
-    async getUserFreeCapital(num_identificacion) {
-        const data = await this.db.getData('usuarios', `num_identificacion = ${num_identificacion}`, `capital, en_deuda`)
+    async getUserFreeCapital(id_document_number, percent) {
+        const userInfo = await this.db.getData('users', `id_document_number = ${id_document_number}`, `capital, pasive`)
         if (data) {
-            const { en_deuda, capital } = data[0]
-            const capitalFree = (capital * Number(process.env.FREE_USER_CAPITAL_PERCENT)) / 100
-            return capitalFree - en_deuda
+            const { pasive, capital } = userInfo[0]
+            const freeCapital = (capital * percent) / 100
+            return freeCapital - pasive
         } else {
             throw boom.notFound('inexistent resource')
         }
     }
 
     async getUserPayments(user_id) {
-        const data = await this.db.getData('transacciones', `usuario_id = ${user_id}`)
-        if (data) {
-            return data
+        const dapayments = await this.db.getData('transactions', `issuer = ${user_id}`)
+        if (dapayments) {
+            return dapayments
         } else {
             throw boom.notFound('inexistent resource')
         }

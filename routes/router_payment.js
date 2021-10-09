@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { setPaymentSchema, updatePaymentSchema } = require('../utils/schemas/schema_payments')
+const { setPaymentSchema, updatePaymentSchema } = require('../utils/router_schemas/schema_payments')
 const validation = require('../utils/middlewares/validation_handler')
 
 const paymentService = require('../services/serv_payments')

@@ -2,16 +2,17 @@ const express = require('express')
 const router = express.Router()
 const boom = require('@hapi/boom')
 
-const validationHandler = require('../utils/middlewares/validation_handler')
-const { userIdSchema, createUserSchema, editUserSchema } = require('../utils/schemas/schema_user')
+const validateSchema = require('../utils/middlewares/validation_handler')
+const { createUser, userId, editUser, freePercent } = require('../utils/router_schemas/schema_user')
+
+const validScope = require('../utils/middlewares/scopes_validation')
 
 const Services = require('../services/serv_users')
 const services = new Services()
 
-const passport = require('passport')
+const passport = require('passport').authenticate('jwt', { session: false })
 
-router.get('/', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
-    console.log(req.user)
+router.get('/', passport, validScope(['2-super-user', '4-president']), async (req, res, next) => {
     try {
         const users = await services.getAllUsers()
         res.json({
@@ -24,22 +25,13 @@ router.get('/', passport.authenticate('jwt', { session: false }), async (req, re
     }
 })
 
-router.post('/', validationHandler(createUserSchema), async (req, res, next) => {
+router.get('/:id', passport, validScope(['1-normal', '2-super-user', '4-president']), validateSchema(userId, 'params'), async (req, res, next) => {
     try {
-        const result = await services.createUser(req.body)
-        res.status(201).json({
-            message: 'User created',
-            statusCode: '201',
-            data: req.body
-        })
-    } catch (error) {
-        next(error)
-    }
-})
+        const { id } = req.params
 
-router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
-    try {
-        const user = await services.getUser(req.params.usuario_id)
+        if (req.user.rol === '1-normal' && Number(id) !== Number(req.user.id)) throw boom.unauthorized()
+
+        const user = await services.getUser(req.params.id)
         if (user) {
             res.json({
                 message: 'User finded',
@@ -47,16 +39,29 @@ router.get('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req
                 data: user
             })
         } else {
-            next(boom.notFound('Inexistent resource'))
+            throw boom.notFound('Inexistent resource')
         }
     } catch (error) {
         next(error)
     }
 })
 
-router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validationHandler(editUserSchema), async (req, res, next) => {
+router.post('/', passport, validScope(['2-super-user', '4-president']), validateSchema(createUser), async (req, res, next) => {
     try {
-        const result = await services.editUser(req.params.usuario_id, req.body)
+        const newUserData = await services.createUser(req.body)
+        res.status(201).json({
+            message: 'User created',
+            statusCode: '201',
+            data: newUserData
+        })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.put('/:id', passport, validScope(['2-super-user', '4-president']), validateSchema(createUser), async (req, res, next) => {
+    try {
+        const result = await services.editUser(req.params.id, req.body)
         if (result) {
             res.json({
                 message: 'User edited',
@@ -74,12 +79,15 @@ router.put('/:usuario_id', validationHandler(userIdSchema, 'params'), validation
     }
 })
 
-router.get('/:usuario_id/loan', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
+router.get('/:id/loans', passport, validateSchema(userId, 'params'), async (req, res, next) => {
     try {
-        const data = await services.getUserLoans(req.params.usuario_id)
+        
+        if (req.user.rol === '1-normal' && Number(id) !== Number(req.user.id)) throw boom.unauthorized()
+
+        const data = await services.getUserLoans(req.params.id)
         if (data) {
             res.json({
-                message: `User ${req.params.usuario_id} loans`,
+                message: `User ${req.params.id} loans`,
                 statusCode: '200',
                 data: data
             })
@@ -91,14 +99,15 @@ router.get('/:usuario_id/loan', validationHandler(userIdSchema, 'params'), async
     }
 })
 
-router.get('/:num_identificacion/free_capital', async (req, res, next) => {
+router.get('/:id_document_number/free_capital/:percent', validateSchema(freePercent, 'params'), async (req, res, next) => {
     try {
-        const data = await services.getUserFreeCapital(req.params.num_identificacion)
-        if (data || data === 0) {
+        const { id_document_number, percent } = req.params
+        const freeCapital = await services.getUserFreeCapital(id_document_number, percent)
+        if (freeCapital || freeCapital === 0) {
             res.json({
-                message: `User identified with number ${req.params.num_identificacion} free capital`,
+                message: `User identified with number ${id_document_number} free capital`,
                 statusCode: '200',
-                data: data
+                data: freeCapital
             })
         } else {
             next(boom.notFound('Inexistent resource'))
@@ -108,24 +117,19 @@ router.get('/:num_identificacion/free_capital', async (req, res, next) => {
     }
 })
 
-router.get(':usedId/payments', async (req, res, next) => {
-    res.send('hola pecuecas')
-})
-
-router.delete('/:usuario_id', validationHandler(userIdSchema, 'params'), async (req, res, next) => {
+router.get(':id/payments', validateSchema(userId, 'params'), async (req, res, next) => {
     try {
-        const data = await services.deleteUser(req.params.usuario_id)
-        if (data[1].affectedRows > 0) {
-            res.json({
-                message: 'User deleted',
-                statusCode: '200',
-                data: data[0]
-            })
-        } else {
-            next(boom.notFound('Inexistent resource'))
-        }
-    } catch (error) {
-        next(error)
+        
+        if (req.user.rol === '1-normal' && Number(id) !== Number(req.user.id)) throw boom.unauthorized()
+        
+        const payments = await services.getUserPayments(req.params.id)
+        res.json({
+            message: `User ${req.params.id} payments list`,
+            statusCode: '200',
+            data: payments
+        })
+    } catch (err) {
+        next(err)
     }
 })
 

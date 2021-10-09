@@ -3,7 +3,7 @@ const router = express.Router()
 const boom = require('@hapi/boom')
 
 const validationHandler = require('../utils/middlewares/validation_handler')
-const { applyLoanSchema, updateLoanStatus } = require('../utils/schemas/schema_loan')
+const { applyLoanSchema, updateLoanStatus } = require('../utils/router_schemas/schema_loan')
 
 const Services = require('../services/serv_loans')
 
