@@ -27,13 +27,10 @@ class UserServices {
     }
 
     async createUser(data) {
-        console.log('aca entra')
         const pswdlessData = { ...data }
         delete pswdlessData.password
-        console.log(pswdlessData, data)
         const userCreated = await this.db.upsert('users', pswdlessData)
         if (data.password) {
-            console.log('entra al if')
             await this.setPassword(userCreated.insertId, data.password)
         }
         return { newUserId: userCreated.insertId }

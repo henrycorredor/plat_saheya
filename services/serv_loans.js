@@ -1,5 +1,5 @@
 const boom = require('@hapi/boom')
-const MySqlClass = require('../lib/mysql')
+const loanHandlerClass = require('../lib/loan_query_handler')
 
 const loanUpdater = require('../utils/loan_handling/loan_updater')
 const [
@@ -11,77 +11,55 @@ const [
 
 class LoanServices {
     constructor() {
-        this.db = MySqlClass
+        this.handler = new loanHandlerClass()
     }
 
     async getAllLoans() {
-        const query = `SELECT pre.*, GROUP_CONCAT(coo.id_codeudor, '-', coo.monto_avalado, '-', coo.aprobado ORDER BY coo.orden) AS coodeudores
-        FROM prestamos pre
-        LEFT JOIN relaciones_coodeudores coo
-        ON pre.prestamo_id = coo.id_prestamo AND coo.id_codeudor != 0
-        GROUP BY pre.prestamo_id`
-
-        const data = this.db.doQuery(query)
-        return data
+        return await this.handler.getAllLoans()
     }
 
-    async applyNewLoan(data) {
-        let result
-        switch (Number(data.tipo)) {
+    async applyNewLoan(req_user, loanApplicationData) {
+        let loanSchema
+        switch (Number(loanApplicationData.type)) {
             case 1:
-                result = await ordinarioCuotaFija.validator(data)
+                loanSchema = await ordinarioCuotaFija.validator(req_user, loanApplicationData)
                 break
             case 2:
-                result = await ordinarioSinCuotaFija.validator(data)
+                loanSchema = await ordinarioSinCuotaFija.validator(req_user, loanApplicationData)
                 break
             case 3:
-                result = await extraordinario.validator(data)
+                loanSchema = await extraordinario.validator(req_user, loanApplicationData)
                 break
             case 4:
-                result = await extraExtraordinario.validator(data)
+                loanSchema = await extraExtraordinario.validator(req_user, loanApplicationData)
                 break
             default:
                 throw boom.badRequest('wrong type code')
         }
 
-        const loanData = result
+        if (loanSchema.approval) {
+            await this.handler.user(loanApplicationData.debtor_id).freezeUserCapital()
 
-        if (result.approval) {
+            const cosigners = (loanApplicationData.cosigners) ? loanApplicationData.cosigners : []
+            delete loanApplicationData.cosigners
 
-            const cosigners = (data.coodeudores) ? data.coodeudores : []
-            const adminCredentials = (loanData.features.adminPermission) ? loanData.features.adminPermission : []
-
-            delete data.coodeudores
-
-            await this.db.upsert('usuarios', { capital_congelado: 1 }, `usuario_id = ${data.deudor_id}`)
-            const setLoanQuery = await this.db.upsert('prestamos', data)
-
-            result.loanId = setLoanQuery.insertId
+            const newLoanId = await this.handler.setLoan(loanApplicationData)
 
             const setCosigners = cosigners.map(async (cosigner, index) => {
-                await this.db.upsert('relaciones_coodeudores', {
-                    id_prestamo: setLoanQuery.insertId,
-                    id_codeudor: cosigner.id_codeudor,
-                    monto_avalado: cosigner.monto_avalado,
-                    orden: index
-                })
-                await this.db.upsert('usuarios', { capital_congelado: 1 }, `usuario_id = ${cosigner.id_codeudor}`)
+                await this.handler.loan(newLoanId).setCosigner(cosigner, index)
+                await this.handler.user(cosigner.cosigner_id).freezeUserCapital()
             })
             await Promise.all(setCosigners)
 
-            const setAdmin = adminCredentials.map(async adminRole => {
-                await this.db.upsert('relaciones_coodeudores', {
-                    id_prestamo: setLoanQuery.insertId,
-                    id_codeudor: 0,
-                    monto_avalado: 0,
-                    orden: 0,
-                    rol: adminRole
-                })
+            const adminCredentials = (loanSchema.features.adminPermission) ? loanSchema.features.adminPermission : []
+            const setAdmins = adminCredentials.map(async (adminRole) => {
+                await this.handler.loan(newLoanId).setCosigner({ cosigner_id: 0, guaranteed_amount: 0, rol: adminRole })
             })
-            await Promise.all(setAdmin)
+            await Promise.all(setAdmins)
+            loanSchema.loanId = newLoanId
         }
 
-        return result
+        return loanSchema
     }
 
     async getLoan(id) {

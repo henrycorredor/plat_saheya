@@ -5,11 +5,13 @@ const boom = require('@hapi/boom')
 const validationHandler = require('../utils/middlewares/validation_handler')
 const { applyLoanSchema, updateLoanStatus } = require('../utils/router_schemas/schema_loan')
 
+const passport = require('passport').authenticate('jwt', { session: false })
+
 const Services = require('../services/serv_loans')
 
 const services = new Services()
 
-router.get('/', async (req, res, next) => {
+router.get('/', passport, async (req, res, next) => {
     try {
         const result = await services.getAllLoans()
         res.status(200).json({
@@ -22,9 +24,9 @@ router.get('/', async (req, res, next) => {
     }
 })
 
-router.post('/', validationHandler(applyLoanSchema), async (req, res, next) => {
+router.post('/', passport, validationHandler(applyLoanSchema), async (req, res, next) => {
     try {
-        const result = await services.applyNewLoan(req.body)
+        const result = await services.applyNewLoan(req.user, req.body)
         if (result.approval) {
             res.status(201).json({
                 message: 'Loan setted',

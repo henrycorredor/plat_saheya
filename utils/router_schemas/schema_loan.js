@@ -1,18 +1,18 @@
 const joi = require("@hapi/joi")
 
 const applyLoanSchema = joi.object({
-    fecha_inicial: joi.date().required(),
-    mes_inicial: joi.string().valid(
+    debtor_id: joi.number().required(),
+    initial_date: joi.date().required(),
+    initial_month: joi.string().valid(
         'this',
         'next'
     ).required(),
-    num_cuotas: joi.string().required(),
-    deudor_id: joi.number().required(),
-    monto: joi.number().required(),
-    tipo: joi.number().required(),
-    coodeudores: joi.array().items(joi.object({
-        id_codeudor: joi.number().required(),
-        monto_avalado: joi.number().required()
+    instalments_in_total: joi.string().required(),
+    amount: joi.number().required(),
+    type: joi.number().required(),
+    cosigners: joi.array().items(joi.object({
+        cosigner_id: joi.number().required(),
+        guaranteed_amount: joi.number().required()
     })).required()
 })
 

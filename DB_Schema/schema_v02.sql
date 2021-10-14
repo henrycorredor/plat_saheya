@@ -84,13 +84,13 @@ CREATE TABLE `loans` (
 -- Table structure for table `relaciones_coodeudores`
 --
 
-DROP TABLE IF EXISTS `codebtor_rels`;
+DROP TABLE IF EXISTS `cosigner_rels`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `codebtor_rels` (
+CREATE TABLE `cosigner_rels` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `loan_id` int unsigned NOT NULL,
-  `codebtor_id` int unsigned NOT NULL,
+  `cosigner_id` int unsigned NOT NULL,
   `guaranteed_amount` int NOT NULL,
   `index` int NOT NULL DEFAULT '1',
   `status` tinyint NOT NULL DEFAULT '1',
