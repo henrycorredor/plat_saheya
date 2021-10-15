@@ -7,10 +7,12 @@ const { applyLoanSchema, updateLoanStatus } = require('../utils/router_schemas/s
 
 const passport = require('passport').authenticate('jwt', { session: false })
 
-const Services = require('../services/serv_loans')
+const scopes = require('../utils/middlewares/scopes_validation')
 
+const Services = require('../services/serv_loans')
 const services = new Services()
 
+// get all loans list
 router.get('/', passport, async (req, res, next) => {
     try {
         const result = await services.getAllLoans()
@@ -24,7 +26,8 @@ router.get('/', passport, async (req, res, next) => {
     }
 })
 
-router.post('/', passport, validationHandler(applyLoanSchema), async (req, res, next) => {
+// apply new loan
+router.post('/', passport, scopes([['self', 'body', 'debtor_id']]), validationHandler(applyLoanSchema), async (req, res, next) => {
     try {
         const result = await services.applyNewLoan(req.user, req.body)
         if (result.approval) {
@@ -41,27 +44,26 @@ router.post('/', passport, validationHandler(applyLoanSchema), async (req, res, 
     }
 })
 
-router.get('/:loanId', async (req, res, next) => {
+//get one loan info
+router.get('/:loanId', passport, async (req, res, next) => {
     try {
-        const result = await services.getLoan(req.params.loanId)
-        if (result) {
-            res.status(200).json({
-                message: `Loan id ${req.params.loanId}`,
-                statusCode: '200',
-                data: result[0]
-            })
-        } else {
-            next(boom.notFound('Inexistent resource'))
-        }
+        const { params, user } = req
+        const result = await services.getLoan(params.loanId, user)
+        res.status(200).json({
+            message: `Loan id ${req.params.loanId}`,
+            statusCode: '200',
+            data: result
+        })
     } catch (error) {
         next(error)
     }
 })
 
-router.put('/:loandId', validationHandler(updateLoanStatus, 'body'), async (req, res, next) => {
+//update loan status
+router.put('/:loandId', passport, validationHandler(updateLoanStatus, 'body'), async (req, res, next) => {
     try {
         const { rol, new_status } = req.body
-        const result = await services.updateLoan(rol, req.params.loandId, new_status)
+        const result = await services.updateLoan(req.params.loandId, rol, new_status, req.user)
         res.status(200).json({
             message: result.msg,
             statusCode: '200',

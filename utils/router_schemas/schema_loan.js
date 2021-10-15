@@ -7,7 +7,7 @@ const applyLoanSchema = joi.object({
         'this',
         'next'
     ).required(),
-    instalments_in_total: joi.string().required(),
+    instalments_in_total: joi.number().required(),
     amount: joi.number().required(),
     type: joi.number().required(),
     cosigners: joi.array().items(joi.object({
@@ -30,15 +30,3 @@ const updateLoanStatus = joi.object({
 })
 
 module.exports = { applyLoanSchema, updateLoanStatus }
-
-/*
-prestamo_id    | int unsigned | NO   | PRI | NULL              | auto_increment    |
-| fecha_inicial  | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| num_cuotas     | tinyint      | NO   |     | NULL              |                   |
-| cuotas_pagadas | tinyint      | NO   |     | 0                 |                   |
-| deudor_id      | int unsigned | NO   |     | NULL              |                   |
-| estado         | tinyint(1)   | NO   |     | 1                 |                   |
-| monto          | int          | YES  |     | NULL              |                   |
-| fecha_registro | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| pagado
-*/

@@ -5,14 +5,15 @@ const boom = require('@hapi/boom')
 const validateSchema = require('../utils/middlewares/validation_handler')
 const { createUser, userId, editUser, freePercent } = require('../utils/router_schemas/schema_user')
 
-const validScope = require('../utils/middlewares/scopes_validation')
+const scopes = require('../utils/middlewares/scopes_validation')
 
 const Services = require('../services/serv_users')
 const services = new Services()
 
 const passport = require('passport').authenticate('jwt', { session: false })
 
-router.get('/', passport, validScope(['2-super-user', '4-president']), async (req, res, next) => {
+//list all users
+router.get('/', passport, scopes(['2-super-user', '4-president']), async (req, res, next) => {
     try {
         const users = await services.getAllUsers()
         res.json({
@@ -25,7 +26,8 @@ router.get('/', passport, validScope(['2-super-user', '4-president']), async (re
     }
 })
 
-router.get('/:id', passport, validScope(['1-normal', '2-super-user', '4-president']), validateSchema(userId, 'params'), async (req, res, next) => {
+//get one user info
+router.get('/:id', passport, scopes([['sefl'], '2-super-user', '4-president']), validateSchema(userId, 'params'), async (req, res, next) => {
     try {
         const { id } = req.params
 
@@ -46,7 +48,8 @@ router.get('/:id', passport, validScope(['1-normal', '2-super-user', '4-presiden
     }
 })
 
-router.post('/', passport, validScope(['2-super-user', '4-president']), validateSchema(createUser), async (req, res, next) => {
+// create user
+router.post('/', passport, scopes(['2-super-user', '4-president']), validateSchema(createUser), async (req, res, next) => {
     try {
         const newUserData = await services.createUser(req.body)
         res.status(201).json({
@@ -59,7 +62,8 @@ router.post('/', passport, validScope(['2-super-user', '4-president']), validate
     }
 })
 
-router.put('/:id', passport, validScope(['2-super-user', '4-president']), validateSchema(createUser), async (req, res, next) => {
+//edit user info
+router.put('/:id', passport, scopes([['self'], '2-super-user', '4-president']), validateSchema(editUser), async (req, res, next) => {
     try {
         const result = await services.editUser(req.params.id, req.body)
         if (result) {
@@ -79,9 +83,10 @@ router.put('/:id', passport, validScope(['2-super-user', '4-president']), valida
     }
 })
 
-router.get('/:id/loans', passport, validateSchema(userId, 'params'), async (req, res, next) => {
+//get one user loans
+router.get('/:id/loans', passport, scopes([['self']]), validateSchema(userId, 'params'), async (req, res, next) => {
     try {
-        
+
         if (req.user.rol === '1-normal' && Number(id) !== Number(req.user.id)) throw boom.unauthorized()
 
         const data = await services.getUserLoans(req.params.id)
@@ -99,7 +104,8 @@ router.get('/:id/loans', passport, validateSchema(userId, 'params'), async (req,
     }
 })
 
-router.get('/:id_document_number/free_capital/:percent', validateSchema(freePercent, 'params'), async (req, res, next) => {
+//get user free capital by document number
+router.get('/:id_document_number/free_capital/:percent', passport, validateSchema(freePercent, 'params'), async (req, res, next) => {
     try {
         const { id_document_number, percent } = req.params
         const freeCapital = await services.getUserFreeCapital(id_document_number, percent)
@@ -117,11 +123,9 @@ router.get('/:id_document_number/free_capital/:percent', validateSchema(freePerc
     }
 })
 
-router.get(':id/payments', validateSchema(userId, 'params'), async (req, res, next) => {
+//list payments done by user
+router.get(':id/payments', passport, scopes([['self'], '2-super-user', '3-treasurer', '4-president', '5-fiscal']), validateSchema(userId, 'params'), async (req, res, next) => {
     try {
-        
-        if (req.user.rol === '1-normal' && Number(id) !== Number(req.user.id)) throw boom.unauthorized()
-        
         const payments = await services.getUserPayments(req.params.id)
         res.json({
             message: `User ${req.params.id} payments list`,

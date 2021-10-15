@@ -1,7 +1,7 @@
 const boom = require('@hapi/boom')
 const loanHandlerClass = require('../lib/loan_query_handler')
+const paymentsService = require('../services/serv_payments')
 
-const loanUpdater = require('../utils/loan_handling/loan_updater')
 const [
     extraExtraordinario,
     ordinarioCuotaFija,
@@ -12,6 +12,7 @@ const [
 class LoanServices {
     constructor() {
         this.handler = new loanHandlerClass()
+        this.payments = new paymentsService()
     }
 
     async getAllLoans() {
@@ -19,6 +20,8 @@ class LoanServices {
     }
 
     async applyNewLoan(req_user, loanApplicationData) {
+        if (!this.handler.user(req_user.id).isFrozen()) throw boom.notAcceptable('El capital de este usuario está congelado')
+
         let loanSchema
         switch (Number(loanApplicationData.type)) {
             case 1:
@@ -62,19 +65,19 @@ class LoanServices {
         return loanSchema
     }
 
-    async getLoan(id) {
-        const loan = await this.db.getData('prestamos', `prestamo_id = ${id}`)
-        if (loan) {
-            const cosigners = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${id}`, `id_codeudor, monto_avalado, aprobado`)
-            loan[0].coodeudores = cosigners.filter(cos => cos.id_codeudor !== 0)
+    async getLoan(loan_id, user) {
+        const loan = await this.handler.loan(loan_id).getInfo()
+        if ((user.rol === '1-normal' && loan.debtor_id === user.id) || user.rol !== '1-normal') {
+            return loan
+        } else {
+            throw boom.unauthorized()
         }
-        return loan
     }
 
-    async updateLoan(rol, loan_id, status) {
-
+    async updateLoan(loan_id, action_rol, status, req_user) {
         //statuses list:
         /*
+        1-waiting
         2-reject
         3-accept
         5-treasurer-approve
@@ -83,16 +86,97 @@ class LoanServices {
         8-loan-ended
         10-freeze
         */
+        const loan = await this.handler.loan(loan_id).getInfo()
+        const rels = await this.handler.loan(loan_id).getRels()
+        const cosigners = []
+        rels.map(rel => { if (rel.rol === 1) cosigners.push(rel.cosigner_id) })
+        if (rels) {
+            const answer = { msg: '', newStatus: 0, rol: 1 }
 
-        rol = Number(rol)
+            //if is an admin user, user ID is useless and is setted to 0
+            const userId = (action_rol === 1) ? req_user.id : 0
 
-        //if is an admin user, user ID is useless and is setted to 0
-        const userId = (rol === 1) ? Number(process.env.USER_ID) : 0
+            // if is admin rol verifies the user has credencial
+            if (action_rol !== 1 && (req_user.rol.split("-")[0] !== action_rol)) throw boom.unauthorized()
 
-        const relationships = await this.db.getData('relaciones_coodeudores', `id_prestamo = ${loan_id}`)
+            let myRel
+            if (action_rol === 3) {
+                [myRel] = rels.filter(rel => (rel.rol === 3))
+            } else {
+                [myRel] = rels.filter(rel => (rel.rol === action_rol && rel.cosigner_id === userId))
+            }
 
-        if (relationships) {
-            return loanUpdater(relationships, loan_id, status, userId, rol)
+            if (myRel.lenght === 0) throw boom.badRequest()
+
+            switch (status) {
+                case '2-reject':
+                    //reject loan - admin and users
+                    // status 1 -> 2
+                    if (myRel.status !== 1) throw boom.notFound('inexistent resource')
+
+                    this.handler.loan(loan_id).reject()
+                    this.handler.rel(myRel.id).reject()
+
+                    await this.handler.user(loan.debtor_id).unfreezeUserCapital()
+                    await this.handler.users(cosigners).unfreezeUserCapital()
+
+                    answer.msg = `Loan ${loan_id} has been rejected`
+                    answer.newStatus = 2
+                    answer.rol = action_rol
+                    break
+                case '3-accept':
+                    // accept - cosigners and admin
+                    // status 1 -> 3
+                    await this.handler.rel(myRel.id).accept()
+
+                    const isTheLast = rels.filter(rel => rel.status === 1)
+                    if (isTheLast.lenght === 1) {
+                        await this.handler.loan(loan_id).waitForDocuments()
+                    }
+
+                    if (myRel.rol === 3) { //the system needs to know who was the treasure who signed this rel
+                        await this.handler.rel(myRel.id).signRel(req_user.id)
+                    }
+
+                    answer.msg = `loan id ${loan_id} has been apoved by user ${req_user.id} rol ${action_rol}`
+                    answer.newStatus = 3
+                    answer.rol = action_rol
+                    break
+                case '5-treasurer-approve':
+                    //only treasurer can aprove this stage
+                    if (loan.status === 4 && action_rol === 3) {
+                        await this.handler.loan(loan_id).treasurerAprove()
+                        await this.handler.loan(loan_id).generateCuotes()
+
+                        answer.msg = `loan id ${loan_id} has been confirmed`
+                        answer.newStatus = 5
+                        answer.rol = action_rol
+                    } else {
+                        throw boom.badRequest('Wrong request')
+                    }
+                    break
+                case '6-treasurer-confirm-disbursement':
+                    if (action_rol !== 3) throw boom.unauthorized('not autorized petition')
+                    if (loan.status === 5 || loan.status === 7) {
+                        const newStatus6 = (loan.status === 5) ? 6 : 8
+                        if (newStatus6 === 6) {
+                            await this.handler.user(loan.debtor_id).unfreezeUserCapital()
+                            await this.handler.users(cosigners).unfreezeUserCapital()
+                            await this.handler.loan(loan_id).treasurerConfirmDisbursement()
+                            await this.handler.loan(loan_id).treasurerDisbursement()
+                        }else{
+
+                        }
+                    } else {
+                        throw boom.badRequest('no resource found')
+                    }
+                    break;
+                
+                default:
+                    throw boom.badRequest('wrong status code')
+            }
+
+            return answer
         } else {
             throw boom.notFound('inexistent resource')
         }

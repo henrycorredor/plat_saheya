@@ -45,12 +45,11 @@ const conditions = {
             let userInfo
             let freeCapital
             for (i = 0; i < cosigners_array.length; i++) {
-                [userInfo] = await this.db.getData('users', `id = ${cosigners_array[i].cosigner_id}`, `capital, pasive`)
-                freeCapital = ((Number(userInfo.capital) * percentageAllowed) / 100) - Number(userInfo.pasive)
+                [userInfo] = await this.db.getData('users', `id = ${cosigners_array[i].cosigner_id}`, `capital, pasive, capital_frozen`)
+                if (userInfo.capital_frozen === 1) return [false, `El coodeudor '${cosigners_array[i].cosigner_id}' tiene el capital congelado`]
 
-                if (freeCapital < cosigners_array[i].monto_avalado) {
-                    return [false, `El coodeudor '${cosigners_array[i].cosigner_id}' excede el monto de su capital libre.`]
-                }
+                freeCapital = ((Number(userInfo.capital) * percentageAllowed) / 100) - Number(userInfo.pasive)
+                if (freeCapital < cosigners_array[i].guaranteed_amount) return [false, `El coodeudor '${cosigners_array[i].cosigner_id}' excede el monto de su capital libre.`]
             }
         } else if (capitalFunds === 'TOTAL_COMPANY_CASH') {
 
@@ -100,6 +99,7 @@ const val = {
             features: {}
         }
 
+        // filters parameters are defined by the loan_schemas, which are attached later with object method Assign
         const keys = Object.keys(this.filters)
 
         for (i = 0; i < keys.length; i++) {
@@ -110,8 +110,6 @@ const val = {
                 break
             }
         }
-
-        // filters parameters are defined in "loan_schemas"
 
         if (this.filters.selfDebtMaxAmount.cosignerNeeded && msg.approval) {
             if (user_loan_aplication.cosigners.length === 0) {
