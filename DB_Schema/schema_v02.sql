@@ -92,6 +92,7 @@ CREATE TABLE `cosigner_rels` (
   `loan_id` int unsigned NOT NULL,
   `cosigner_id` int unsigned NOT NULL,
   `guaranteed_amount` int NOT NULL,
+  `guaranteed_payed` int NOT NULL DEFAULT '0',
   `index` int NOT NULL DEFAULT '1',
   `status` tinyint NOT NULL DEFAULT '1',
   `last_update` timestamp NULL DEFAULT NULL,

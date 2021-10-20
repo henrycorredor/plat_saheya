@@ -97,7 +97,7 @@ class LoanServices {
             const userId = (action_rol === 1) ? req_user.id : 0
 
             // if is admin rol verifies the user has credencial
-            if (action_rol !== 1 && (req_user.rol.split("-")[0] !== action_rol)) throw boom.unauthorized()
+            if (action_rol !== 1 && (Number(req_user.rol.split("-")[0]) !== action_rol)) throw boom.unauthorized()
 
             let myRel
             if (action_rol === 3) {
@@ -106,7 +106,8 @@ class LoanServices {
                 [myRel] = rels.filter(rel => (rel.rol === action_rol && rel.cosigner_id === userId))
             }
 
-            if (myRel.lenght === 0) throw boom.badRequest()
+            // status 7 is the only one in which debtor updates its own loan
+            if (!myRel && (status === '7-user-confirm-disbursement' && req_user.id !== loan.debtor_id)) throw boom.unauthorized()
 
             switch (status) {
                 case '2-reject':
@@ -130,7 +131,8 @@ class LoanServices {
                     await this.handler.rel(myRel.id).accept()
 
                     const isTheLast = rels.filter(rel => rel.status === 1)
-                    if (isTheLast.lenght === 1) {
+
+                    if (isTheLast.length === 1) {
                         await this.handler.loan(loan_id).waitForDocuments()
                     }
 
@@ -163,15 +165,37 @@ class LoanServices {
                             await this.handler.user(loan.debtor_id).unfreezeUserCapital()
                             await this.handler.users(cosigners).unfreezeUserCapital()
                             await this.handler.loan(loan_id).treasurerConfirmDisbursement()
-                            await this.handler.loan(loan_id).treasurerDisbursement()
-                        }else{
-
+                        } else {
+                            await this.handler.loan(loan_id).bothSidesConfirm()
                         }
+                        await this.handler.loan(loan_id).treasurerDisbursement()
+
+                        answer.msg = `loan id ${loan_id} disbursement confirmed`
+                        answer.newStatus = 5
+                        answer.rol = action_rol
                     } else {
                         throw boom.badRequest('no resource found')
                     }
-                    break;
-                
+                    break
+                case '7-user-confirm-disbursement':
+                    if (action_rol !== 1) throw boom.unauthorized('not autorized petition')
+
+                    if (loan.status === 5 || loan.status === 6) {
+                        const newStatus7 = (loan.status === 5) ? 7 : 8
+                        if (newStatus7 === 7) {
+                            await this.handler.user(loan.debtor_id).unfreezeUserCapital()
+                            await this.handler.users(cosigners).unfreezeUserCapital()
+                            await this.handler.loan(loan_id).userConfirmDisbursement()
+                        } else {
+                            await this.handler.loan(loan_id).bothSidesConfirm()
+                        }
+                        answer.msg = `loan id ${loan_id} confirmed`
+                        answer.newStatus = 5
+                        answer.rol = action_rol
+                    } else {
+                        throw boom.badRequest('no resource found')
+                    }
+                    break
                 default:
                     throw boom.badRequest('wrong status code')
             }
@@ -183,7 +207,7 @@ class LoanServices {
     }
 
     async getLoanCuotes(loan_id) {
-        const cuotes = await this.db.getData('cuotas', `id_prestamo = ${loan_id}`)
+        const cuotes = await this.handler.loan(loan_id).getInstallmentes()
         if (cuotes) {
             return cuotes
         } else {
@@ -192,8 +216,7 @@ class LoanServices {
     }
 
     async getCuote(cuote_id) {
-        const cuote = await this.db.getData('cuotas', `cuota_id = ${cuote_id}`)
-        console.log(cuote_id, cuote)
+        const cuote = await this.handler.getOneInstallment(cuote_id)
         if (cuote) {
             return cuote[0]
         } else {

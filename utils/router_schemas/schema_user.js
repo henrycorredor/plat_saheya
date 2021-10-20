@@ -25,7 +25,8 @@ const editUser = joi.object({
     join_date: joi.date(),
     ppal_phone: joi.number(),
     email: joi.string().email(),
-    password: joi.string()
+    password: joi.string(),
+    rol: joi.string().valid('1-normal', '2-super-user', '3-treasurer', '4-president', '5-fiscal')
 })
 
 const freePercent = joi.object({

@@ -1,32 +1,36 @@
 const joi = require('@hapi/joi')
 
 const setPaymentSchema = joi.object({
-    emisor: joi.number().required(),
-    fecha_realizacion: joi.date().required(),
-    monto: joi.number().required(),
-    comentario: joi.string(),
-    destinatario: joi.number().required(),
-    transacciones: joi.array().items(joi.object({
-        motivo: joi.string().valid('prestamo', 'abono').required(),
-        datos: joi.alternatives().conditional('motivo', {
-            is: 'prestamo',
+    issuer: joi.number().required(),
+    issuer_rol: joi.string().valid('1-normal', '2-super-user', '3-treasurer', '4-president', '5-fiscal').required(),
+    transaction_date: joi.date().required(),
+    amount: joi.number().required(),
+    comment: joi.string(),
+    receiver: joi.number().required(),
+    transactions: joi.array().items(joi.object({
+        aim: joi.string().valid('instalment', 'suscription').required(),
+        data: joi.alternatives().conditional('aim', {
+            is: 'instalment',
             then: joi.object({
-                prestamo_id: joi.number().required(),
-                monto_total: joi.number().required(),
-                abono: joi.number().required(),
-                interes: joi.number().required(),
-                cuota_numero: joi.number().required(),
-                fecha_realizacion: joi.date().required()
+                loan_id: joi.number().required(),
+                total_amount: joi.number().required(),
+                instalment: joi.number().required(),
+                interest: joi.number().required(),
+                instalment_number: joi.number().required()
             }),
             otherwise: joi.object({
-                monto: joi.number().required()
+                amount: joi.number().required()
             })
         }).required()
     }).required()).required()
 })
 
 const updatePaymentSchema = joi.object({
-    estado: joi.number().valid(1, 2, 3).required()
+    status: joi.string().valid('2-rejected', '3-approved').required()
 })
 
-module.exports = { setPaymentSchema, updatePaymentSchema }
+const paymentId = joi.object({
+    paymentId: joi.number().required()
+})
+
+module.exports = { setPaymentSchema, updatePaymentSchema, paymentId }

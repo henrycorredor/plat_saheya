@@ -46,7 +46,8 @@ class UserServices {
             await this.setPassword(id, data.password)
             delete data.password
         }
-        if (data.length < 0) {
+        
+        if (data && Object.keys(data).length > 0) {
             await this.db.upsert('users', data, `id = ${id}`)
         }
         return true
@@ -58,9 +59,9 @@ class UserServices {
     }
 
     async getUserFreeCapital(id_document_number, percent) {
-        const userInfo = await this.db.getData('users', `id_document_number = ${id_document_number}`, `capital, pasive`)
-        if (data) {
-            const { pasive, capital } = userInfo[0]
+        const userInfo = await this.db.getOne('users', `id_document_number = ${id_document_number}`, `capital, pasive`)
+        if (userInfo) {
+            const { pasive, capital } = userInfo
             const freeCapital = (capital * percent) / 100
             return freeCapital - pasive
         } else {

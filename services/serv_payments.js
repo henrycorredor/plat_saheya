@@ -8,11 +8,11 @@ class PaymentService {
     }
 
     async listPayments() {
-        const dbPayments = await this.db.getData('transacciones')
+        const dbPayments = await this.db.getData('transactions')
         const payments = []
         const getReferences = dbPayments.map(async payment => {
-            const loans_payment = await this.db.getData('transacciones_prestamos', `pago_id = ${payment.transaccion_id}`)
-            const suscription_payment = await this.db.getData('transacciones_abonos', `transaccion_id = ${payment.transaccion_id}`)
+            const loans_payment = await this.db.getData('trans_instalments', `transaction_id = ${payment.id}`)
+            const suscription_payment = await this.db.getData('trans_subscriptions', `transaction_id = ${payment.id}`)
             payments.push({
                 ...payment,
                 pago_prestamo: (loans_payment) ? loans_payment[0] : '',
@@ -24,80 +24,63 @@ class PaymentService {
     }
 
     async setNewPayment(payment) {
-        const [treasurer] = await this.db.getData('usuarios', `usuario_id = ${payment.destinatario}`, 'rol')
-        if (treasurer.rol !== 3) {
-            throw boom.badRequest(`El usuario ${payment.destinatario} no es tesorero`)
-        }
         const transaction = { ...payment }
 
-        delete transaction.transacciones
+        delete transaction.transactions
+        
+        const setTransaction = await this.db.upsert('transactions', transaction)
 
-        const setTransaction = await this.db.upsert('transacciones', transaction)
-
-        const setQuery = payment.transacciones.map(async transaction => {
-            const motivo = transaction.motivo
-            delete transaction.motivo
-            if (motivo === 'abono') {
-                transaction.datos.transaccion_id = setTransaction.insertId
-                await this.db.upsert('transacciones_abonos', transaction.datos)
+        const setQuery = payment.transactions.map(async transaction => {
+            const aim = transaction.aim
+            delete transaction.aim
+            if (aim === 'suscription') {
+                transaction.data.transaction_id = setTransaction.insertId
+                await this.db.upsert('trans_subscriptions', transaction.data)
             } else {
-                transaction.datos.pago_id = setTransaction.insertId
-                await this.db.upsert('transacciones_prestamos', transaction.datos)
+                transaction.data.transaction_id = setTransaction.insertId
+                await this.db.upsert('trans_instalments', transaction.data)
             }
         })
-
         await Promise.all(setQuery)
 
         return setTransaction
     }
 
     async updatePayment(payment_id, update_data) {
-        if (update_data.estado === 2) {
-            await this.db.upsert('transacciones', { estado: 2 }, `transaccion_id = ${payment_id}`)
-        } else if (update_data.estado === 3) {
-            const [transactionInfo] = await this.db.getData('transacciones', `transaccion_id = ${payment_id}`, "emisor, destinatario, estado, monto")
+        if (update_data.status === '2-rejected') {
+            await this.db.upsert('transactions', { status: 2 }, `id = ${payment_id}`)
+        } else {
+            const transaction = await this.db.getOne('transactions', `id = ${payment_id}`, "issuer, receiver, status, ampunt")
 
-            if (transactionInfo.estado !== 1) {
-                throw boom.badRequest('not resource found')
-            }
+            if (transaction.status !== 1) throw boom.badRequest('not resource found')
 
             let addCapital = 0
             let substractPasive = 0
 
-            await this.db.upsert('transacciones', { estado: 3 }, `transaccion_id = ${payment_id}`)
+            await this.db.upsert('transactions', { status: 3 }, `id = ${payment_id}`)
 
-            const [suscription] = await this.db.getData('transacciones_abonos', `transaccion_id = ${payment_id}`)
+            const suscription = await this.db.getOne('trans_subscriptions', `transaction_id = ${payment_id}`)
             if (suscription) {
-                addCapital = suscription.monto
-                await this.db.doQuery(`UPDATE usuarios SET capital = capital + ${suscription.monto} WHERE usuario_id = ${transactionInfo.emisor}`)
+                const userCapital = await this.db.getOne('users', `id = ${transaction.emisor}`, 'capital')
+                await this.db.upsert('users', { capital: userCapital + suscription.amount }, `id = ${transaction.issuer}`)
             }
 
-            const loan_payment = await this.db.getData('transacciones_prestamos', `pago_id = ${payment_id}`)
-            if (loan_payment) {
-                substractPasive = loan_payment.abono
-                await this.db.doQuery(`UPDATE usuarios SET en_deuda = en_deuda - ${loan_payment.abono} WHERE usuario_id = ${transactionInfo.emisor}`)
-                
+            const loanPayment = await this.db.getOne('trans_instalments', `transaction_id = ${payment_id}`,'instalment')
+            if (loanPayment) {
+                const userPasive = await this.db.getOne('users', `id = ${transaction.issuer}`, 'pasive')
+                await this.db.upsert('users', {pasive: userPasive - loanPayment.instalment}, `id = ${transaction.issuer}`)
             }
 
-            let capital = await this.db.getData('capital ORDER BY mov_id DESC LIMIT 1')
-            if (!capital) {
-                capital = {
-                    total_activo_actual: 0,
-                    total_activo_anterior: 0,
-                    total_pasivo_actual: 0,
-                    total_pasivo_anterior: 0
-                }
-            } else {
-                capital = capital[0]
-            }
+            let [capital] = await this.db.getData('capital ORDER BY mov_id DESC LIMIT 1')
+
             await this.db.upsert('capital', {
-                total_activo_actual: capital.total_activo_actual + addCapital,
-                total_activo_anterior: capital.total_activo_actual,
-                transaccion_id: payment_id,
-                monto: transactionInfo.monto,
-                total_pasivo_actual: capital.total_pasivo_actual - substractPasive,
-                total_pasivo_anterior: capital.total_pasivo_actual,
-                administrador: transactionInfo.destinatario
+                active_actual: capital.active_actual + addCapital,
+                active_previous: capital.active_actual,
+                pasive_actual: capital.total_pasivo_actual - substractPasive,
+                pasive_previous: capital.pasive_actual,
+                transaction_id: payment_id,
+                amount: transaction.monto,
+                holder: transaction.destinatario
             })
         }
         return true

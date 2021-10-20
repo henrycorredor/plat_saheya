@@ -1,4 +1,4 @@
-const MySqlClass = require('../../lib/mysql')
+const DB = require('../../lib/mysql')
 
 const loanSchemas = require('./loan_schemas')
 
@@ -11,18 +11,17 @@ function roundToCeil(amount, roundTo) {
 }
 
 const cuotesGenerator = async function (loan_id) {
-    const db = new MySqlClass()
 
-    const [loan] = await db.getData('prestamos', `prestamo_id = ${loan_id}`)
+    const loan = await DB.getOne('loans', `id = ${loan_id}`)
 
-    const [loanSchema] = loanSchemas.filter(schema => schema.loanCode === loan.tipo)
+    const [loanSchema] = loanSchemas.filter(schema => schema.loanCode === loan.type)
 
-    const lastDayOfMonth = moment(loan.fecha_inicial).endOf('month')
-    const monthDaysLeft = moment(lastDayOfMonth).diff(moment(loan.fecha_inicial), 'days')
+    const lastDayOfMonth = moment(loan.initial_date).endOf('month')
+    const monthDaysLeft = moment(lastDayOfMonth).diff(moment(loan.initial_date), 'days')
 
-    const daysInMonth = moment(loan.fecha_inicial, "YYYY-MM").daysInMonth()
+    const daysInMonth = moment(loan.initial_date, "YYYY-MM").daysInMonth()
 
-    const addMonthsRatio = (loan.mes_inicial === 'this') ? 0 : 1
+    const addMonthsRatio = (loan.initial_month === 'this') ? 0 : 1
 
     let validfrom
     let validUntil
@@ -31,17 +30,17 @@ const cuotesGenerator = async function (loan_id) {
     switch (loanSchema.features.cuoteType) {
         case 'MONTH_FIXED_CUOTE':
             const data = [{
-                id_prestamo: loan_id,
-                cuota_num: 0,
-                monto: loan.monto,
-                en_deuda_futura: loan.monto,
-                vigencia_desde: moment().format('YYYY-MM-DD'),
-                vigencia_hasta: moment(loan.fecha_inicial).format('YYYY-MM-DD'),
-                interes: 0,
-                multa: 0,
-                pagado: 0,
-                en_deuda: 0,
-                estado: 2
+                loan_id: loan_id,
+                instalment_number: 0,
+                amount: loan.amount,
+                interest: 0,
+                payed_amount: 0,
+                in_debt: 0,
+                penalty: 0,
+                future_debt: loan.amount,
+                valid_from: moment().format('YYYY-MM-DD'),
+                valid_till: moment(loan.initial_date).format('YYYY-MM-DD'),
+                status: 2
             }]
 
             let fixedCuote = 0
@@ -50,31 +49,31 @@ const cuotesGenerator = async function (loan_id) {
             let interestByMonth = 0
             let interestAcumulated = 0
 
-            const realCuoteAmount = (loan.monto / loan.num_cuotas).toFixed(2)
+            const realCuoteAmount = (loan.amount / loan.instalments_in_total).toFixed(2)
             const cuoteRounded = roundToCeil(realCuoteAmount, 100)
 
-            for (i = 0; i < loan.num_cuotas; i++) {
-                onDebtMemory = (onDebtMemory === 0) ? loan.monto : onDebt
+            for (i = 0; i < loan.instalments_in_total; i++) {
+                onDebtMemory = (onDebtMemory === 0) ? loan.amount : onDebt
 
                 interestByMonth = roundToCeil((onDebtMemory * loanSchema.features.interest) / 100, 100)
 
                 if (i === 0) {
                     const interestFractionOfMonth = roundToCeil((interestByMonth * monthDaysLeft) / daysInMonth, 100)
-                    interestByMonth = (loan.mes_inicial === 'this') ? interestFractionOfMonth : interestByMonth + interestFractionOfMonth
+                    interestByMonth = (loan.initial_month === 'this') ? interestFractionOfMonth : interestByMonth + interestFractionOfMonth
                 }
 
                 interestAcumulated += interestByMonth
 
                 surplus += (cuoteRounded - realCuoteAmount)
 
-                fixedCuote = (i === (loan.num_cuotas - 1)) ? roundToCeil(cuoteRounded - surplus, 100) : cuoteRounded
+                fixedCuote = (i === (loan.instalments_in_total - 1)) ? roundToCeil(cuoteRounded - surplus, 100) : cuoteRounded
 
-                validfrom = moment(loan.fecha_inicial).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
+                validfrom = moment(loan.initial_date).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
                 validUntil = moment(validfrom).endOf('month').format('YYYY-MM-DD')
 
                 if (i === 0) {
-                    if (loan.mes_inicial === 'this') {
-                        validfrom = moment(loan.fecha_inicial).format('YYYY-MM-DD')
+                    if (loan.initial_month === 'this') {
+                        validfrom = moment(loan.initial_date).format('YYYY-MM-DD')
                     }
                 }
 
@@ -86,86 +85,86 @@ const cuotesGenerator = async function (loan_id) {
                 }
 
                 data.push({
-                    id_prestamo: loan_id,
-                    cuota_num: i + 1,
-                    monto: fixedCuote,
-                    en_deuda_futura: onDebt,
-                    vigencia_desde: validfrom,
-                    vigencia_hasta: validUntil,
-                    interes: 0,
-                    multa: 0,
-                    pagado: 0,
-                    en_deuda: onDebtMemory
+                    loan_id: loan_id,
+                    instalment_number: i + 1,
+                    amount: fixedCuote,
+                    future_debt: onDebt,
+                    valid_from: validfrom,
+                    valid_till: validUntil,
+                    interest: 0,
+                    penalty: 0,
+                    payed_amount: 0,
+                    in_debt: onDebtMemory
                 })
             }
 
-            const fixedInterest = roundToCeil(interestAcumulated / loan.num_cuotas, 100)
+            const fixedInterest = roundToCeil(interestAcumulated / loan.instalments_in_total, 100)
 
-            const insertCuotes = data.map(async cuote => {
-                if (cuote.cuota_num !== 0) {
-                    cuote.interes = fixedInterest
+            const insertInstalments = data.map(async instalment => {
+                if (instalment.instalment_number !== 0) {
+                    instalment.interest = fixedInterest
                 }
-                await db.upsert('cuotas', cuote)
+                await DB.upsert('instalments', instalment)
             })
 
-            await Promise.all(insertCuotes)
+            await Promise.all(insertInstalments)
             break
 
         case 'ONLY_MONTHLY_INTEREST':
-            const fixed_interest = roundToCeil((loan.monto * loanSchema.features.interest) / 100, 100)
+            const fixed_interest = roundToCeil((loan.amount * loanSchema.features.interest) / 100, 100)
             let interest_this_month
             let cuote
 
-            for (i = 0; i < loan.num_cuotas; i++) {
-                validfrom = moment(loan.fecha_inicial).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
+            for (i = 0; i < loan.instalment_number; i++) {
+                validfrom = moment(loan.initial_date).add(addMonthsRatio + i, 'month').startOf('month').format('YYYY-MM-DD')
                 validUntil = moment(validfrom).endOf('month').format('YYYY-MM-DD')
 
                 if (i === 0) {
                     const interestFractionOfMonth = roundToCeil((fixed_interest * monthDaysLeft) / daysInMonth, 100)
-                    interest_this_month = (loan.mes_inicial === 'this') ? interestFractionOfMonth : fixed_interest + interestFractionOfMonth
+                    interest_this_month = (loan.initial_month === 'this') ? interestFractionOfMonth : fixed_interest + interestFractionOfMonth
 
-                    if (loan.mes_inicial === 'this') {
-                        validfrom = moment(loan.fecha_inicial).format('YYYY-MM-DD')
+                    if (loan.initial_month === 'this') {
+                        validfrom = moment(loan.initial_date).format('YYYY-MM-DD')
                     }
                 } else {
                     interest_this_month = fixed_interest
                 }
 
-                if (i === loan.num_cuotas - 1) {
-                    cuote = loan.monto
+                if (i === loan.instalment_number - 1) {
+                    cuote = loan.amount
                     onDebt = 0
                 } else {
                     cuote = 0
-                    onDebt = loan.monto
+                    onDebt = loan.amount
                 }
 
                 if (i === 0) {
-                    await db.upsert('cuotas', {
-                        id_prestamo: loan_id,
-                        monto: loan.monto,
-                        cuota_num: i,
-                        en_deuda_futura: loan.monto,
-                        vigencia_desde: moment().format('YYYY-MM-DD'),
-                        vigencia_hasta: loan.fecha_inicial,
-                        interes: 0,
-                        multa: 0,
-                        pagado: 0,
-                        en_deuda: loan.monto,
-                        estado: 2
+                    await DB.upsert('instalments', {
+                        loan_id: loan_id,
+                        amount: loan.amount,
+                        instalment_number: i,
+                        future_debt: loan.amount,
+                        valid_from: moment().format('YYYY-MM-DD'),
+                        valid_till: loan.initial_date,
+                        interest: 0,
+                        penalty: 0,
+                        payed_amount: 0,
+                        in_debt: loan.amount,
+                        status: 2
                     })
                 }
 
-                await db.upsert('cuotas', {
-                    id_prestamo: loan_id,
-                    monto: cuote,
-                    cuota_num: i + 1,
-                    en_deuda_futura: onDebt,
-                    vigencia_desde: validfrom,
-                    vigencia_hasta: validUntil,
-                    interes: interest_this_month,
-                    multa: 0,
-                    pagado: 0,
-                    en_deuda: loan.monto
+                await DB.upsert('instalments', {
+                    loan_id: loan_id,
+                    amount: cuote,
+                    instalment_number: i + 1,
+                    future_debt: onDebt,
+                    valid_from: validfrom,
+                    valid_till: validUntil,
+                    interest: interest_this_month,
+                    penalty: 0,
+                    payed_amount: 0,
+                    in_debt: loan.amount
                 })
             }
             break
