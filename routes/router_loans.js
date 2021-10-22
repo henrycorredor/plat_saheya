@@ -6,7 +6,6 @@ const validationHandler = require('../utils/middlewares/validation_handler')
 const { applyLoanSchema, updateLoanStatus } = require('../utils/router_schemas/schema_loan')
 
 const passport = require('passport').authenticate('jwt', { session: false })
-
 const scopes = require('../utils/middlewares/scopes_validation')
 
 const Services = require('../services/serv_loans')

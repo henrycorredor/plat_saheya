@@ -164,12 +164,10 @@ class LoanServices {
                         if (newStatus6 === 6) {
                             await this.handler.user(loan.debtor_id).unfreezeUserCapital()
                             await this.handler.users(cosigners).unfreezeUserCapital()
-                            await this.handler.loan(loan_id).treasurerConfirmDisbursement()
+                            await this.handler.loan(loan_id).fistConfirmation(newStatus6)
                         } else {
-                            await this.handler.loan(loan_id).bothSidesConfirm()
+                            await this.handler.loan(loan_id).secondConfirmation(newStatus6)
                         }
-                        await this.handler.loan(loan_id).treasurerDisbursement()
-
                         answer.msg = `loan id ${loan_id} disbursement confirmed`
                         answer.newStatus = 5
                         answer.rol = action_rol
@@ -185,9 +183,9 @@ class LoanServices {
                         if (newStatus7 === 7) {
                             await this.handler.user(loan.debtor_id).unfreezeUserCapital()
                             await this.handler.users(cosigners).unfreezeUserCapital()
-                            await this.handler.loan(loan_id).userConfirmDisbursement()
+                            await this.handler.loan(loan_id).fistConfirmation(newStatus7)
                         } else {
-                            await this.handler.loan(loan_id).bothSidesConfirm()
+                            await this.handler.loan(loan_id).secondConfirmation(newStatus7)
                         }
                         answer.msg = `loan id ${loan_id} confirmed`
                         answer.newStatus = 5
