@@ -46,7 +46,7 @@ class UserServices {
             await this.setPassword(id, data.password)
             delete data.password
         }
-        
+
         if (data && Object.keys(data).length > 0) {
             await this.db.upsert('users', data, `id = ${id}`)
         }
@@ -63,7 +63,7 @@ class UserServices {
         if (userInfo) {
             const { pasive, capital } = userInfo
             const freeCapital = (capital * percent) / 100
-            return freeCapital - pasive
+            return freeCapital - (pasive * -1)
         } else {
             throw boom.notFound('inexistent resource')
         }

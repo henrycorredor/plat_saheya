@@ -16,8 +16,6 @@ const capitalData = {
     holder: 0
 }
 
-
-
 Promise.all(
     [MySqlClass.doQuery('DELETE FROM capital'),
     MySqlClass.upsert('capital', capitalData),
@@ -26,6 +24,7 @@ Promise.all(
     MySqlClass.doQuery('DELETE FROM transactions'),
     MySqlClass.doQuery('DELETE FROM trans_subscriptions'),
     MySqlClass.doQuery('DELETE FROM trans_instalments'),
+    MySqlClass.doQuery('DELETE FROM instalments'),
     MySqlClass.doQuery('UPDATE users SET ?', usersData)]
 ).then(() => {
     console.log('done')

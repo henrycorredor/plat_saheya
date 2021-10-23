@@ -48,11 +48,22 @@ class LoanServices {
 
             const newLoanId = await this.handler.setLoan(loanApplicationData)
 
+            let cosignedAmount = 0
+            let selfIndex = 0
             const setCosigners = cosigners.map(async (cosigner, index) => {
+                cosignedAmount += cosigner.guaranteed_amount
                 await this.handler.loan(newLoanId).setCosigner(cosigner, index)
                 await this.handler.user(cosigner.cosigner_id).freezeUserCapital()
+                selfIndex = index
             })
             await Promise.all(setCosigners)
+
+            //self record in cosigner rels
+            await this.handler.loan(newLoanId).setCosigner({
+                cosigner_id: req_user.id,
+                guaranteed_amount: loanApplicationData.amount - cosignedAmount,
+                status: 3
+            }, ++selfIndex)
 
             const adminCredentials = (loanSchema.features.adminPermission) ? loanSchema.features.adminPermission : []
             const setAdmins = adminCredentials.map(async (adminRole) => {
@@ -61,7 +72,6 @@ class LoanServices {
             await Promise.all(setAdmins)
             loanSchema.loanId = newLoanId
         }
-
         return loanSchema
     }
 
@@ -105,7 +115,6 @@ class LoanServices {
             } else {
                 [myRel] = rels.filter(rel => (rel.rol === action_rol && rel.cosigner_id === userId))
             }
-
             // status 7 is the only one in which debtor updates its own loan
             if (!myRel && (status === '7-user-confirm-disbursement' && req_user.id !== loan.debtor_id)) throw boom.unauthorized()
 
@@ -128,6 +137,8 @@ class LoanServices {
                 case '3-accept':
                     // accept - cosigners and admin
                     // status 1 -> 3
+                    if(!myRel) throw boom.badRequest('check your petition')
+                    
                     await this.handler.rel(myRel.id).accept()
 
                     const isTheLast = rels.filter(rel => rel.status === 1)
@@ -164,7 +175,7 @@ class LoanServices {
                         if (newStatus6 === 6) {
                             await this.handler.user(loan.debtor_id).unfreezeUserCapital()
                             await this.handler.users(cosigners).unfreezeUserCapital()
-                            await this.handler.loan(loan_id).fistConfirmation(newStatus6)
+                            await this.handler.loan(loan_id).firstConfirmation(newStatus6)
                         } else {
                             await this.handler.loan(loan_id).secondConfirmation(newStatus6)
                         }

@@ -33,14 +33,15 @@ CREATE TABLE `capital` (
   `amount` int NOT NULL,
   `active_actual` int unsigned NOT NULL,
   `active_previous` int unsigned NOT NULL,
-  `pasive_actual` int unsigned NOT NULL,
-  `pasive_previous` int unsigned NOT NULL,
+  `pasive_actual` int NOT NULL,
+  `pasive_previous` int NOT NULL,
   `transaction_id` int unsigned NOT NULL,
   `holder` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+INSERT INTO `capital` SET `amount = 0, active_actual = 0, active_previous = 0, pasive_actual = 0, pasive_previous = 0, transaction_id = 0, holder = 0`;
 --
 -- Table structure for table `contrasenias`
 --
@@ -149,7 +150,7 @@ CREATE TABLE `trans_instalments` (
   `transaction_id` int not null,
   `loan_id` int unsigned NOT NULL,
   `instalment_number` tinyint NOT NULL DEFAULT '0',
-  `total_amount` int unsigned NOT NULL,
+  `total_amount` int NOT NULL,
   `instalment` int unsigned NOT NULL,
   `interest` int unsigned NOT NULL,
   PRIMARY KEY (`id`)
