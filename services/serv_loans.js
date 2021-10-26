@@ -194,7 +194,7 @@ class LoanServices {
                         if (newStatus7 === 7) {
                             await this.handler.user(loan.debtor_id).unfreezeUserCapital()
                             await this.handler.users(cosigners).unfreezeUserCapital()
-                            await this.handler.loan(loan_id).fistConfirmation(newStatus7)
+                            await this.handler.loan(loan_id).firstConfirmation(newStatus7)
                         } else {
                             await this.handler.loan(loan_id).secondConfirmation(newStatus7)
                         }

@@ -32,12 +32,12 @@ const cuotesGenerator = async function (loan_id) {
             const data = [{
                 loan_id: loan_id,
                 instalment_number: 0,
-                amount: loan.amount,
+                amount: loan.amount *-1,
                 interest: 0,
                 payed_amount: 0,
                 in_debt: 0,
                 penalty: 0,
-                future_debt: loan.amount,
+                future_debt: loan.amount * -1,
                 valid_from: moment().format('YYYY-MM-DD'),
                 valid_till: moment(loan.initial_date).format('YYYY-MM-DD'),
                 status: 2
@@ -88,13 +88,13 @@ const cuotesGenerator = async function (loan_id) {
                     loan_id: loan_id,
                     instalment_number: i + 1,
                     amount: fixedCuote,
-                    future_debt: onDebt,
+                    future_debt: onDebt * -1,
                     valid_from: validfrom,
                     valid_till: validUntil,
                     interest: 0,
                     penalty: 0,
                     payed_amount: 0,
-                    in_debt: onDebtMemory
+                    in_debt: onDebtMemory * -1
                 })
             }
 
@@ -141,15 +141,15 @@ const cuotesGenerator = async function (loan_id) {
                 if (i === 0) {
                     await DB.upsert('instalments', {
                         loan_id: loan_id,
-                        amount: loan.amount,
+                        amount: loan.amount * -1,
                         instalment_number: i,
-                        future_debt: loan.amount,
+                        future_debt: loan.amount * -1,
                         valid_from: moment().format('YYYY-MM-DD'),
                         valid_till: loan.initial_date,
                         interest: 0,
                         penalty: 0,
                         payed_amount: 0,
-                        in_debt: loan.amount,
+                        in_debt: loan.amount * -1,
                         status: 2
                     })
                 }
@@ -158,13 +158,13 @@ const cuotesGenerator = async function (loan_id) {
                     loan_id: loan_id,
                     amount: cuote,
                     instalment_number: i + 1,
-                    future_debt: onDebt,
+                    future_debt: onDebt * -1,
                     valid_from: validfrom,
                     valid_till: validUntil,
                     interest: interest_this_month,
                     penalty: 0,
                     payed_amount: 0,
-                    in_debt: loan.amount
+                    in_debt: loan.amount * -1
                 })
             }
             break
