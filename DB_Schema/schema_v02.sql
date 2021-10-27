@@ -41,7 +41,8 @@ CREATE TABLE `capital` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `capital` SET `amount = 0, active_actual = 0, active_previous = 0, pasive_actual = 0, pasive_previous = 0, transaction_id = 0, holder = 0`;
+INSERT INTO capital SET amount = 0, active_actual = 0, active_previous = 0, pasive_actual = 0, pasive_previous = 0, transaction_id = 0, holder = 0;
+
 --
 -- Table structure for table `contrasenias`
 --
