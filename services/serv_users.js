@@ -9,16 +9,13 @@ class UserServices {
     }
 
     async setPassword(user_id, password) {
-        console.log('eltra a la funcion')
         const hashPassword = await argon2.hash(password)
         const prevPassword = await this.db.getData('passwords', `user_id = ${user_id}`)
-        console.log(prevPassword)
         if (prevPassword) {
             await this.db.upsert('passwords', { user_id: user_id, password: hashPassword }, `user_id = ${user_id}`)
         } else {
             await this.db.upsert('passwords', { user_id: user_id, password: hashPassword })
         }
-        console.log('termina la funcion')
     }
 
     async getAllUsers() {

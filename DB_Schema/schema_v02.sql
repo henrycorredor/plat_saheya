@@ -152,7 +152,7 @@ CREATE TABLE `trans_instalments` (
   `loan_id` int unsigned NOT NULL,
   `instalment_number` tinyint NOT NULL DEFAULT '0',
   `total_amount` int NOT NULL,
-  `instalment` int unsigned NOT NULL,
+  `instalment` int NOT NULL,
   `interest` int unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

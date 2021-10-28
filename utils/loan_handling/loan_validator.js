@@ -30,7 +30,6 @@ const conditions = {
         if (capitalFunds === 'USER_FREE_CAPITAL') {
             const [userInfo] = await this.db.getData('users', `id = ${req_user.id}`, `capital, pasive`)
             availableCapital = ((userInfo.capital * percentageAllowed) / 100) - userInfo.pasive
-            console.log(availableCapital, userInfo.capital, percentageAllowed, userInfo.pasive, user_loan_amount)
         }
         const compare = this.compare(availableCapital, user_loan_amount, `El monto supera la cantidad permitida para este tipo de préstamo.`)
         if (!cosignerNeeded) {
