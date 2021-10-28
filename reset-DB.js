@@ -36,8 +36,8 @@ const cosignersData = {
 Promise.all(
     [MySqlClass.doQuery('DELETE FROM capital'),
     MySqlClass.upsert('capital', capitalData),
-    MySqlClass.upsert('loans', loanData, 'id = 11'),
-    MySqlClass.upsert('cosigner_rels', cosignersData, 'loan_id = 11'),
+    MySqlClass.upsert('loans', loanData, 'id = 4'),
+    MySqlClass.upsert('cosigner_rels', cosignersData, 'loan_id = 4'),
     MySqlClass.doQuery('DELETE FROM transactions'),
     MySqlClass.doQuery('DELETE FROM trans_subscriptions'),
     MySqlClass.doQuery('DELETE FROM trans_instalments'),

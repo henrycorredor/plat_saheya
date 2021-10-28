@@ -52,6 +52,7 @@ class LoanServices {
             let selfIndex = 0
             const setCosigners = cosigners.map(async (cosigner, index) => {
                 cosignedAmount += cosigner.guaranteed_amount
+                cosigner.guaranteed_amount = cosigner.guaranteed_amount * -1
                 await this.handler.loan(newLoanId).setCosigner(cosigner, index)
                 await this.handler.user(cosigner.cosigner_id).freezeUserCapital()
                 selfIndex = index
@@ -61,7 +62,7 @@ class LoanServices {
             //self record in cosigner rels
             await this.handler.loan(newLoanId).setCosigner({
                 cosigner_id: req_user.id,
-                guaranteed_amount: loanApplicationData.amount - cosignedAmount,
+                guaranteed_amount: (loanApplicationData.amount - cosignedAmount) * -1,
                 status: 3
             }, ++selfIndex)
 

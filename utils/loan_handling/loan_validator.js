@@ -45,7 +45,8 @@ const conditions = {
             let userInfo
             let freeCapital
             for (i = 0; i < cosigners_array.length; i++) {
-                [userInfo] = await this.db.getData('users', `id = ${cosigners_array[i].cosigner_id}`, `capital, pasive, capital_frozen`)
+                userInfo = await this.db.getOne('users', `id = ${cosigners_array[i].cosigner_id}`, `capital, pasive, capital_frozen`)
+                if(!userInfo) return [false, `Usuario ${cosigners_array[i].cosigner_id} inexistente`]
                 if (userInfo.capital_frozen === 1) return [false, `El coodeudor '${cosigners_array[i].cosigner_id}' tiene el capital congelado`]
 
                 freeCapital = ((Number(userInfo.capital) * percentageAllowed) / 100) - Number(userInfo.pasive)
