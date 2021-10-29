@@ -1,10 +1,12 @@
 require('dotenv').config()
 const boom = require('@hapi/boom')
 const handlerClass = require('../lib/payments_query_handler')
+const paymentValidator = require('../utils/validators/payment_validator')
 
 class PaymentService {
     constructor() {
         this.handler = new handlerClass()
+        this.validate = new paymentValidator()
     }
 
     async listPayments() {
@@ -39,6 +41,8 @@ class PaymentService {
                 payment.data.transaction_id = setTransaction
                 await this.handler.setSubcription(payment.data)
             } else {
+                const validate = await this.validate.instalmentValidator(payment.data)
+                if (validate.code !== 30) throw boom.badRequest(validate.msg)
                 payment.data.transaction_id = setTransaction
                 await this.handler.setInstalment(payment.data)
             }

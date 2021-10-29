@@ -32,7 +32,7 @@ const cuotesGenerator = async function (loan_id) {
             const data = [{
                 loan_id: loan_id,
                 instalment_number: 0,
-                amount: loan.amount *-1,
+                amount: loan.amount * -1,
                 interest: 0,
                 payed_amount: 0,
                 in_debt: 0,
@@ -40,7 +40,7 @@ const cuotesGenerator = async function (loan_id) {
                 future_debt: loan.amount * -1,
                 valid_from: moment().format('YYYY-MM-DD'),
                 valid_till: moment(loan.initial_date).format('YYYY-MM-DD'),
-                status: 2
+                status: '2-active'
             }]
 
             let fixedCuote = 0
@@ -150,7 +150,7 @@ const cuotesGenerator = async function (loan_id) {
                         penalty: 0,
                         payed_amount: 0,
                         in_debt: loan.amount * -1,
-                        status: 2
+                        status: '2-active'
                     })
                 }
 

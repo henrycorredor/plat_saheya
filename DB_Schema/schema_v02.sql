@@ -149,11 +149,11 @@ DROP TABLE IF EXISTS `trans_instalments`;
 CREATE TABLE `trans_instalments` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `transaction_id` int not null,
-  `loan_id` int unsigned NOT NULL,
-  `instalment_number` tinyint NOT NULL DEFAULT '0',
+  `instalment_id` int unsigned NOT NULL,
   `total_amount` int NOT NULL,
-  `instalment` int NOT NULL,
+  `amount` int NOT NULL,
   `interest` int unsigned NOT NULL,
+  `penalty` int unsigned NOT NULL DEFAULT '0'
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -189,16 +189,16 @@ CREATE TABLE `instalments` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `loan_id`  int unsigned NOT NULL,
   `instalment_number` tinyint NOT NULL,
-  `amount` int NOT NULL,
   `future_debt` int NOT NULL,
   `valid_from` date NOT NULL,
   `valid_till` date NOT NULL,
+  `amount` int NOT NULL,
   `interest` int unsigned NOT NULL,
   `penalty` int unsigned NOT NULL,
   `payed_amount` int NOT NULL DEFAULT '0',
   `in_debt` int NOT NULL,
   `payment_date` date NULL DEFAULT NULL,
-  `status` varchar(11) NOT NULL DEFAULT '1',
+  `status` varchar(11) NOT NULL DEFAULT '1-waiting',
   `transaction_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB CHARSET=utf8;

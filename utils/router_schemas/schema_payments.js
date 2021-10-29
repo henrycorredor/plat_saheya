@@ -12,11 +12,11 @@ const setPaymentSchema = joi.object({
         data: joi.alternatives().conditional('aim', {
             is: 'instalment',
             then: joi.object({
-                loan_id: joi.number().required(),
+                instalment_id: joi.number().required(),
                 total_amount: joi.number().required(),
-                instalment: joi.number().required(),
+                amount: joi.number().required(),
                 interest: joi.number().required(),
-                instalment_number: joi.number().required()
+                penalty: joi.number().required()
             }),
             otherwise: joi.object({
                 amount: joi.number().required()

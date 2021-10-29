@@ -225,8 +225,8 @@ class LoanServices {
         }
     }
 
-    async getCuote(cuote_id) {
-        const cuote = await this.handler.getOneInstallment(cuote_id)
+    async getCuote(loan_id, cuote_number) {
+        const cuote = await this.handler.getOneInstallment(loan_id, cuote_number)
         if (cuote) {
             return cuote[0]
         } else {
