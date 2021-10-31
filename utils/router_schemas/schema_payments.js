@@ -7,6 +7,7 @@ const setPaymentSchema = joi.object({
     amount: joi.number().required(),
     comment: joi.string(),
     receiver: joi.number().required(),
+    receipt: joi.string(),
     transactions: joi.array().items(joi.object({
         aim: joi.string().valid('instalment', 'suscription').required(),
         data: joi.alternatives().conditional('aim', {

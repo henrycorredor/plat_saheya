@@ -3,11 +3,12 @@ const router = express.Router()
 const boom = require('@hapi/boom')
 
 const validateSchema = require('../utils/middlewares/validation_handler')
-const { createUser, userId, editUser, freePercent } = require('../utils/router_schemas/schema_user')
+const { createUser, userId, editUser, freePercent, godparents, editGodfather } = require('../utils/router_schemas/schema_user')
 
 const scopes = require('../utils/middlewares/scopes_validation')
 
 const Services = require('../services/serv_users')
+const validation_handler = require('../utils/middlewares/validation_handler')
 const services = new Services()
 
 const passport = require('passport').authenticate('jwt', { session: false })
@@ -124,13 +125,48 @@ router.get('/:id_document_number/free_capital/:percent', passport, validateSchem
 })
 
 //list payments done by user
-router.get(':id/payments', passport, scopes([['self'], '2-super-user', '3-treasurer', '4-president', '5-fiscal']), validateSchema(userId, 'params'), async (req, res, next) => {
+router.get('/:id/payments', passport, scopes([['self'], '2-super-user', '3-treasurer', '4-president', '5-fiscal']), validateSchema(userId, 'params'), async (req, res, next) => {
     try {
         const payments = await services.getUserPayments(req.params.id)
         res.json({
             message: `User ${req.params.id} payments list`,
             statusCode: '200',
             data: payments
+        })
+    } catch (err) {
+        next(err)
+    }
+})
+
+router.post(`/godparent/:gp/godson/:gs`,
+    passport,
+    scopes(['2-super-user', '4-president']),
+    validateSchema(godparents, 'params'),
+    async (req, res, next) => {
+        try {
+            const setGP = await services.setGodParents(req.params.gp, req.params.gs)
+            res.json({
+                message: `User ${req.params.gp} is godfather of ${req.params.gs}`,
+                statusCode: '201',
+                data: setGP
+            })
+        } catch (err) {
+            next(err)
+        }
+    })
+
+router.put(`/godparent/:id`,
+    passport,
+    scopes(['2-super-user', '4-president']),
+    validateSchema(userId, 'params'),
+    validateSchema(editGodfather),
+    async (req, res, next) => {
+    try {
+        const setGP = await services.updateGodParents(req.params.id, req.body.status)
+        res.json({
+            message: `User ${req.params.gp} is godfather of ${req.params.gs}`,
+            statusCode: '200',
+            data: setGP
         })
     } catch (err) {
         next(err)

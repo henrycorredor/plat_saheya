@@ -87,7 +87,7 @@ router.get('/:loanId/cuote', async (req, res, next) => {
 })
 
 //get one instalment
-router.get('/:loanId/cuote/:cuoteNumber', async (req, res, next) => {
+router.get('/:loanId/cuote/:cuoteNumber', validationHandler(updateLoanStatus, 'params'), async (req, res, next) => {
     try {
         const result = await services.getCuote(req.params.loanId, req.params.cuoteNumber)
         res.json({

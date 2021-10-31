@@ -2,10 +2,10 @@ const config = require('../../config')
 const boom = require('@hapi/boom')
 
 function errorLogger(err, req, res, next) {
-    if (config.dev) {
-        console.log("Error stack:", err.stack)
-    }
     console.log("Error message:", err.message)
+    // if (config.dev) {
+    //     console.log("Error stack:", err.stack)
+    // }
     next(err)
 }
 

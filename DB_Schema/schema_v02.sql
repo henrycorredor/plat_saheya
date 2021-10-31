@@ -119,6 +119,7 @@ CREATE TABLE `transactions` (
   `issuer_rol` varchar(15) NOT NULL DEFAULT '1-normal',
   `receiver` int NOT NULL,
   `status` varchar(12) NOT NULL DEFAULT '1-waiting',
+  `receipt` varchar(25) DEFAULT NULL,
   `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -183,6 +184,15 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+DROP TABLE IF EXISTS `godparents`;
+CREATE TABLE `godparents` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `godfather` int unsigned NOT NULL,
+  `godson` int unsigned NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB CHARSET=utf8;
 
 DROP TABLE IF EXISTS `instalments`;
 CREATE TABLE `instalments` (

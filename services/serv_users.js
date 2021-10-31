@@ -2,6 +2,7 @@ require('dotenv').config()
 const MySqlClass = require('../lib/mysql')
 const boom = require('@hapi/boom')
 const argon2 = require('argon2')
+const { userId } = require('../utils/router_schemas/schema_user')
 
 class UserServices {
     constructor() {
@@ -73,6 +74,16 @@ class UserServices {
         } else {
             throw boom.notFound('inexistent resource')
         }
+    }
+
+    async setGodParents(gp, gs) {
+        const relId = await this.db.upsert('godparents', { godfather: gp, godson: gs })
+        return relId.insertId
+    }
+
+    async updateGodParents(id, status){
+        const updateGD = await this.db.upsert('godparents', {active: status}, `id = ${id}`)
+        return updateGD
     }
 }
 

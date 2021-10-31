@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
+const imageHandler = require('../lib/image_handler')
 const { setPaymentSchema, updatePaymentSchema, paymentId } = require('../utils/router_schemas/schema_payments')
+const { userId } = require('../utils/router_schemas/schema_user')
 const validation = require('../utils/middlewares/validation_handler')
 
 const passport = require('passport').authenticate('jwt', { session: false })
@@ -24,7 +26,7 @@ router.get('/', passport, scopes(['2-super-user', '3-treasurer', '4-president', 
 })
 
 // set a payment
-router.post('/', passport, scopes([['self','body','issuer']]) ,validation(setPaymentSchema), async (req, res, next) => {
+router.post('/', passport, scopes([['self', 'body', 'issuer']]), validation(setPaymentSchema), async (req, res, next) => {
     try {
         const result = await service.setNewPayment(req.body)
         res.status(201).json({
@@ -52,4 +54,32 @@ router.put('/:paymentId', passport, scopes(['2-super-user', '3-treasurer']), val
     }
 })
 
+//configure multer to get pictures
+const path = require('path')
+const multer = require('multer')
+const validation_handler = require('../utils/middlewares/validation_handler')
+const updaload = multer({
+    dest: '../images/receiver',
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg') {
+            return cb(null, false)
+        }
+        cb(null, true)
+    }
+})
+
+//post a picture
+router.post('/user/:id/picture', passport, validation(userId, 'params'), scopes([['self']]), updaload.single('receipt'), async (req, res, next) => {
+    try {
+        const destinationPath = path.join(__dirname, `../images/receipts/${req.params.id}`)
+        const imageId = await imageHandler(req.file, destinationPath)
+        res.json({
+            message: `Imagen stored with id ${imageId}`,
+            statusCode: '201',
+            data: imageId
+        })
+    } catch (e) {
+        next(e)
+    }
+})
 module.exports = router

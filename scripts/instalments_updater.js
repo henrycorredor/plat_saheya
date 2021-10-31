@@ -1,49 +1,90 @@
 const db = require('../lib/mysql')
 const moment = require('moment')
-//const today = moment().format('YYYY-MM-AA')
-const today = moment('2022-04-06').format('YYYY-MM-DD')
+const today = moment().format('YYYY-MM-DD')
 
-
-moment('2010-10-20').isSameOrAfter('2010-10-19'); // true
-moment('2010-10-20').isSameOrAfter('2010-10-20'); // true
-moment('2010-10-20').isSameOrAfter('2010-10-21'); // false
-
-const setActive = db.getData('instalments', `status = '1-waiting'`)
-    .then(waitingInstalments => {
-        const filtrado = waitingInstalments.filter(instalment => {
-            const afterToday = moment(today).isSameOrAfter(instalment.valid_from)
-            const beforeLimitDay = moment(today).isSameOrBefore(instalment.valid_till)
-            return afterToday && beforeLimitDay
+//active instalments
+const setActive = new Promise((resolve, reject) => {
+    db.getData('instalments', `status = '1-waiting'`)
+        .then(waitingInstalments => {
+            return waitingInstalments.filter(instalment => {
+                const afterToday = moment(today).isSameOrAfter(instalment.valid_from)
+                const beforeLimitDay = moment(today).isSameOrBefore(instalment.valid_till)
+                return afterToday && beforeLimitDay
+            })
         })
-        return filtrado
-    })
-    .then(activeInstalments => {
-        const updateInstalments = activeInstalments.map(async instalment => {
-            await db.upsert('instalments', { status: '2-active' }, `id = ${instalment.id}`)
-        })
-        Promise.all(updateInstalments).then(() => {
-            if (updateInstalments.length === 0) {
-                console.log('Ninguna cuota ha sido actualizada')
-            } else {
-                console.log('Las siguientes cotas han sido actualizadas:')
-                console.table(activeInstalments)
-            }
-            //process.exit()
+        .then(activeInstalments => {
+            const updateInstalments = activeInstalments.map(async instalment => {
+                await db.upsert('instalments', { status: '2-active' }, `id = ${instalment.id}`)
+            })
+            Promise.all(updateInstalments).then(() => {
+                resolve([`${activeInstalments.length} cuotas han sido activadas.`, activeInstalments])
+            }).catch(error => {
+                reject(error)
+            })
         }).catch(error => {
-            console.log('Ha ocurrido un error:')
-            console.log(error)
+            reject(error)
         })
-    }).catch(error => {
-        console.log('Ha ocurrido un error:')
-        console.log(error)
-    })
+})
 
-const setOverdue = db.getData('instalments', `status = '2-active'`)
-    .then(waitingInstalments =>{
-        const overdueInstalments = waitingInstalments.filter(instalment => {
-            return moment(today).isAfter(instalment.valid_till)
+// overdue instalment
+const penaltyRules = [{
+    moreThan: 5000000,
+    penalty: 12000
+},
+{
+    moreThan: 1000000,
+    penalty: 8000
+},
+{
+    moreThan: 0,
+    penalty: 4000
+}
+]
+
+const setOverdue = new Promise((resolve, reject) => {
+    db.getData('instalments', `status = '2-active'`)
+        .then(waitingInstalments => {
+            const overdueInstalments = waitingInstalments.filter(instalment => {
+                return moment(today).isAfter(instalment.valid_till)
+            })
+            return overdueInstalments.map(instalment => {
+                for (let i = 0; i < penaltyRules.length; i++) {
+                    if (instalment.amount > penaltyRules[i].moreThan) {
+                        instalment.penalty = penaltyRules[i].penalty
+                        break
+                    }
+                }
+                return instalment
+            })
         })
-        const setOverdueInstalments = overdueInstalments.map(instalment =>{
-            
+        .then(overdueInstalments => {
+            const setOverdueInstalments = overdueInstalments.map(async instalment => {
+                await db.upsert('instalments', { status: '4-overdue', penalty: instalment.penalty }, `id = ${instalment.id}`)
+            })
+            Promise.all(setOverdueInstalments)
+                .then(() => {
+                    resolve([`${overdueInstalments.length} han sido marcadas como morosas.`, overdueInstalments])
+                })
+                .catch(error => {
+                    reject(error)
+                })
         })
+        .catch(error => {
+            reject(error)
+        })
+
+})
+
+Promise.all([setActive, setOverdue])
+    .then(answers => {
+        console.log(`Date: ${today}`)
+        console.log(answers[0][0])
+        console.table(answers[0][1])
+        console.log(answers[1][0])
+        console.table(answers[1][1])
+        process.exit()
+    })
+    .catch(error => {
+        console.log(error)
+        process.exit()
     })

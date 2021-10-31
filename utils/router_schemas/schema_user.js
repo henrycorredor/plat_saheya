@@ -34,4 +34,13 @@ const freePercent = joi.object({
     id_document_number: joi.number().required()
 })
 
-module.exports = { createUser, userId, editUser, freePercent }
+const godparents = joi.object({
+    gp: joi.number().min(1).max(5000).required(),
+    gs: joi.number().min(1).max(5000).required()
+})
+
+const editGodfather = joi.object({
+    status: joi.valid(1, 0).required()
+})
+
+module.exports = { createUser, userId, editUser, freePercent, godparents, editGodfather }
