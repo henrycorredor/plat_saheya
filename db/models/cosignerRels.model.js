@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize')
 const { LOANS_TABLE } = require('./loans.model')
+const { USERS_TABLE } = require('./users.model')
 
 const COSIGNERS_RELS_TABLE = 'cosigner_rels'
 
@@ -25,7 +26,13 @@ const CosignerRelsSchema = {
 	cosignerId: {
 		field: 'cosigner_id',
 		allowNull: false,
-		type: DataTypes.INTEGER
+		type: DataTypes.INTEGER,
+		references: {
+			model: USERS_TABLE,
+			key: id
+		},
+		onUpdate: 'cascade',
+		onDelete: 'set null'
 	},
 	guaranteedAmount: {
 		field: 'guaranteed_amount',
@@ -63,7 +70,8 @@ const CosignerRelsSchema = {
 
 class CosignerRel extends Model {
 	static associations(models) {
-		//completar
+		this.belongsTo(models.User, { as: 'user' })
+		this.belongsTo(models.Loan, { as: 'loan' })
 	}
 	static config(sequelize) {
 		return {

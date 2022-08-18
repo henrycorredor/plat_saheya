@@ -71,7 +71,12 @@ const UserSchema = {
 
 class User extends Model {
     static associations(models) {
-        //completar
+        this.belongsToMany(models.User, {
+            as: 'godparentOf',
+            through: models.Godparent,
+            foreignKey: 'godfather',
+            otherKey: 'godson'
+        })
     }
     static config(sequelize) {
         return {

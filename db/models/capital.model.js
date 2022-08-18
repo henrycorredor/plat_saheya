@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize')
+const { TRANSACTIONS_TABLE } = require('./transactions.model')
 
 const CAPITAL_TABLE = 'capital'
 
@@ -37,7 +38,11 @@ const CapitalSchema = {
     transactionId: {
         allowNull: false,
         field: 'transaction_id',
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
+        references: {
+            model: TRANSACTIONS_TABLE,
+            key: 'id'
+        }
     },
     holder: {
         allowNull: false,
@@ -46,10 +51,10 @@ const CapitalSchema = {
 }
 
 class Capital extends Model {
-    static assciate(){
-        //completar
+    static assciate(models) {
+        this.belongsTo(models.Transaction, { as: 'transaction' })
     }
-    static config(sequelize){
+    static config(sequelize) {
         return {
             sequelize,
             tableName: CAPITAL_TABLE,
