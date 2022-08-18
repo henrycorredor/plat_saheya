@@ -2,7 +2,7 @@ const { Model, DataTypes, Sequelize } = require('sequelize')
 
 const USERS_TABLE = 'users'
 
-const UsersSchema = {
+const UserSchema = {
     id: {
         allowNull: false,
         autoIncrement: true,
@@ -77,10 +77,10 @@ class User extends Model {
         return {
             sequelize,
             tableName: USERS_TABLE,
-            modelName: "Users",
+            modelName: "User",
             timestamps: false
         }
     }
 }
 
-module.exports = { User, UsersSchema, USERS_TABLE }
+module.exports = { User, UserSchema, USERS_TABLE }

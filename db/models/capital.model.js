@@ -1,17 +1,4 @@
-const { Model, DataTypes, Sequelize } = require('sequelize')
-/*
-CREATE TABLE `capital` (
-    `id` int unsigned NOT NULL AUTO_INCREMENT,
-    `amount` int NOT NULL,
-    `active_actual` int unsigned NOT NULL,
-    `active_previous` int unsigned NOT NULL,
-    `pasive_actual` int NOT NULL,
-    `pasive_previous` int NOT NULL,
-    `transaction_id` int unsigned NOT NULL,
-    `holder` int NOT NULL,
-    PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-  */
+const { Model, DataTypes } = require('sequelize')
 
 const CAPITAL_TABLE = 'capital'
 
@@ -29,22 +16,27 @@ const CapitalSchema = {
     },
     actualActive: {
         allowNull: false,
+        field: 'actual_active',
         type: DataTypes.INTEGER
     },
     previousActive: {
         allowNull: false,
+        field: 'previous_active',
         type: DataTypes.INTEGER
     },
     actualPasive: {
         allowNull: false,
+        field: 'actual_pasive',
         type: DataTypes.INTEGER
     },
     previousPasive: {
         allowNull: false,
+        field: 'previous_pasive',
         type: DataTypes.INTEGER
     },
     transactionId: {
         allowNull: false,
+        field: 'transaction_id',
         type: DataTypes.INTEGER
     },
     holder: {
@@ -52,3 +44,19 @@ const CapitalSchema = {
         type: DataTypes.INTEGER
     }
 }
+
+class Capital extends Model {
+    static assciate(){
+        //completar
+    }
+    static config(sequelize){
+        return {
+            sequelize,
+            tableName: CAPITAL_TABLE,
+            modelName: 'Capital',
+            timestamps: false
+        }
+    }
+}
+
+module.exports = { CAPITAL_TABLE, CapitalSchema, Capital }
