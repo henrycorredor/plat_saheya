@@ -70,7 +70,7 @@ const UserSchema = {
 }
 
 class User extends Model {
-    static associations(models) {
+    static associate(models) {
         this.belongsToMany(models.User, {
             as: 'godparentOf',
             through: models.Godparent,

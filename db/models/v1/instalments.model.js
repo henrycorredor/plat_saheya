@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require('sequelize')
 const { LOANS_TABLE } = require('./loans.model')
+const { TRANSACTIONS_TABLE } = require('./transactions.model')
 
 const INSTALMENTS_TABLE = 'instalments'
 
@@ -14,13 +15,7 @@ const InstalmentsSchema = {
 	loanId: {
 		field: 'loan_id',
 		type: DataTypes.INTEGER,
-		allowNull: false,
-		references: {
-			model: LOANS_TABLE,
-			key: 'id'
-		},
-		onUpdate: 'cascade',
-		onDelete: 'set null'
+		allowNull: false
 	},
 	instalmentNumber: {
 		field: 'instalment_number',
@@ -83,9 +78,25 @@ const InstalmentsSchema = {
 	}
 }
 
+//transaction_id, TRANSACTIONS_TABLE
+//loan_id, LOANS_TABLE,
+
+const InstalmentConstraintSchema = (field, table) => {
+	return {
+		fields: [field],
+		type: 'foreign key',
+		references: {
+			table: table,
+			field: 'id'
+		},
+		onUpdate: 'cascade',
+		onDelete: 'cascade'
+	}
+}
+
 class Instalment extends Model {
-	static associations(models) {
-		this.hasOne(models.TransInstalment,{
+	static associate(models) {
+		this.hasOne(models.TransInstalment, {
 			as: 'transaction',
 			foreignKey: 'instalmentId'
 		})
@@ -100,4 +111,4 @@ class Instalment extends Model {
 	}
 }
 
-module.exports = { Instalment, InstalmentsSchema, INSTALMENTS_TABLE }
+module.exports = { Instalment, InstalmentsSchema, InstalmentConstraintSchema, INSTALMENTS_TABLE }

@@ -1,12 +1,12 @@
 require('dotenv').config()
-const MySqlClass = require('../lib/mysql')
+const DB = require('../lib/sequelize')
 const boom = require('@hapi/boom')
 const argon2 = require('argon2')
 const { userId } = require('../utils/router_schemas/schema_user')
 
 class UserServices {
     constructor() {
-        this.db = MySqlClass
+        this.db = DB
     }
 
     async setPassword(user_id, password) {
@@ -20,7 +20,7 @@ class UserServices {
     }
 
     async getAllUsers() {
-        const usersList = await this.db.getData('users')
+        const usersList = await this.db.User.findAll()
         return usersList
     }
 

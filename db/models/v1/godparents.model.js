@@ -25,9 +25,25 @@ const GodparentsSchema = {
 	}
 }
 
+//field: godfather
+//field: godson
+//table: USERS_TABLE
+const GodparentsConstraintSchema = (field, table) => {
+	return {
+		fields: [field],
+		type: 'foreign key',
+		references: {
+			table: table,
+			field: 'id'
+		},
+		onUpdate: 'cascade',
+		onDelete: 'cascade'
+	}
+}
+
 class Godparent extends Model {
-	static associations(models) {
-		//completar
+	static associate(models) {
+		//none to fill
 	}
 	static config(sequelize) {
 		return {
@@ -39,4 +55,4 @@ class Godparent extends Model {
 	}
 }
 
-module.exports = { Godparent, GodparentsSchema, GODPARENTS_TABLE }
+module.exports = { Godparent, GodparentsSchema, GodparentsConstraintSchema, GODPARENTS_TABLE }

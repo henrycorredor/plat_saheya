@@ -1,4 +1,5 @@
 const { Model, DataTypes, Sequelize } = require('sequelize')
+const { USERS_TABLE } = require('./users.model')
 
 const TRANSACTIONS_TABLE = 'transactions'
 
@@ -31,7 +32,7 @@ const TransactionsSchema = {
 		field: 'issuer_rol',
 		type: DataTypes.STRING,
 		defaultValue: '1-normal',
-		allowNull: false
+		allowNull: false,
 	},
 	receiver: {
 		type: DataTypes.INTEGER,
@@ -50,9 +51,31 @@ const TransactionsSchema = {
 	}
 }
 
+//two cells need to be attached:
+// receiver and issuer
+const TransactionConstraintSchema = (cell) => {
+	return {
+		fields: [cell],
+		type: 'foreign key',
+		references: {
+			table: USERS_TABLE,
+			field: 'id'
+		},
+		onDelete: 'cascade',
+		onUpdate: 'cascade'
+	}
+}
+
 class Transaction extends Model {
-	static associations(models) {
-		//completar
+	static associate(models) {
+		this.hasOne(models.TransInstalment, {
+			foreignKey: 'transactionId',
+			as: 'instalment'
+		})
+		this.hasOne(models.TransSubscription, {
+			foreignKey: 'transactionId',
+			as: 'subscription'
+		})
 	}
 	static config(sequelize) {
 		return {
@@ -64,4 +87,4 @@ class Transaction extends Model {
 	}
 }
 
-module.exports = { Transaction, TransactionsSchema, TRANSACTIONS_TABLE }
+module.exports = { Transaction, TransactionsSchema, TransactionConstraintSchema, TRANSACTIONS_TABLE }

@@ -42,13 +42,7 @@ const LoansSchema = {
 	debtorId: {
 		allowNull: false,
 		type: DataTypes.INTEGER,
-		field: 'debtor_id',
-		references: {
-			model: USERS_TABLE,
-			key: 'id'
-		},
-		onUpdate: 'cascade',
-		onDelete: 'set null'
+		field: 'debtor_id'
 	},
 	status: {
 		type: DataTypes.TINYINT,
@@ -77,6 +71,17 @@ const LoansSchema = {
 	}
 }
 
+const LoansConstraintSchema = {
+	fields: ['debtor_id'],
+	type: 'foreign key',
+	references: {
+		table: USERS_TABLE,
+		field: 'id'
+	},
+	onUpdate: 'cascade',
+	onDelete: 'cascade'
+}
+
 class Loan extends Model {
 	static associate(models) {
 		this.hasMany(models.Instalment, {
@@ -98,4 +103,4 @@ class Loan extends Model {
 	}
 }
 
-module.exports = { Loan, LoansSchema, LOANS_TABLE }
+module.exports = { Loan, LoansSchema, LoansConstraintSchema, LOANS_TABLE }

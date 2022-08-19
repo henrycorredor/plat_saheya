@@ -51,7 +51,7 @@ const CapitalSchema = {
 }
 
 class Capital extends Model {
-    static assciate(models) {
+    static associate(models) {
         this.belongsTo(models.Transaction, { as: 'transaction' })
     }
     static config(sequelize) {

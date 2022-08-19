@@ -1,5 +1,4 @@
 const { Model, DataTypes } = require('sequelize')
-const { INSTALMENTS_TABLE } = require('./instalments.model')
 
 const TRANS_INSTALMENTS_TABLE = 'trans_instalments'
 
@@ -19,13 +18,7 @@ const TransInstalmentsSchema = {
 	instalmentId: {
 		field: 'instalment_id',
 		type: DataTypes.INTEGER,
-		allowNull: false,
-		references: {
-			model: INSTALMENTS_TABLE,
-			key: 'id'
-		},
-		onUpdate: 'cascade',
-		onDelete: 'set null'
+		allowNull: false
 	},
 	totalAmount: {
 		field: 'total_amount',
@@ -47,9 +40,25 @@ const TransInstalmentsSchema = {
 	}
 }
 
+//field: transaction_id, table: TRANSACTIONS_TABLE
+//field: instalment_id, table: INSTALMENTS_TABLE
+const TransInstalmentsConstraintSchema = (field, table) => {
+	return {
+		fields: [field],
+		type: 'foreign key',
+		references: {
+			table,
+			field: 'id'
+		},
+		onUpdate: 'cascade',
+		onDelete: 'cascade'
+	}
+}
+
 class TransInstalment extends Model {
-	static associations(models) {
+	static associate(models) {
 		this.belongsTo(models.Instalment, { as: 'instalment' })
+		this.belongsTo(models.Transaction, { as: 'transaction' })
 	}
 	static config(sequelize) {
 		return {
@@ -61,4 +70,4 @@ class TransInstalment extends Model {
 	}
 }
 
-module.exports = { TransInstalment, TransInstalmentsSchema, TRANS_INSTALMENTS_TABLE }
+module.exports = { TransInstalment, TransInstalmentsSchema, TransInstalmentsConstraintSchema, TRANS_INSTALMENTS_TABLE }

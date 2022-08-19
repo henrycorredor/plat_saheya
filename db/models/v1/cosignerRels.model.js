@@ -15,24 +15,12 @@ const CosignerRelsSchema = {
 	loanId: {
 		field: 'loan_id',
 		allowNull: false,
-		type: DataTypes.INTEGER,
-		references: {
-			model: LOANS_TABLE,
-			key: 'id'
-		},
-		onUpdate: 'cascade',
-		onDelete: 'set null'
+		type: DataTypes.INTEGER
 	},
 	cosignerId: {
 		field: 'cosigner_id',
 		allowNull: false,
-		type: DataTypes.INTEGER,
-		references: {
-			model: USERS_TABLE,
-			key: id
-		},
-		onUpdate: 'cascade',
-		onDelete: 'set null'
+		type: DataTypes.INTEGER
 	},
 	guaranteedAmount: {
 		field: 'guaranteed_amount',
@@ -67,9 +55,23 @@ const CosignerRelsSchema = {
 	}
 }
 
+//field: loan_id, table: LOANS_TABLE
+//field: cosigner_id, table: USERS_TABLE
+const CosignerRelsConstraintSchema = (field, table) => {
+	return {
+		fields: [field],
+		type: 'foreign key',
+		references: {
+			table: table,
+			field: 'id'
+		},
+		onDelete: 'cascade',
+		onUpdate: 'cascade'
+	}
+}
 
 class CosignerRel extends Model {
-	static associations(models) {
+	static associate(models) {
 		this.belongsTo(models.User, { as: 'user' })
 		this.belongsTo(models.Loan, { as: 'loan' })
 	}
@@ -83,4 +85,4 @@ class CosignerRel extends Model {
 	}
 }
 
-module.exports = { CosignerRel, CosignerRelsSchema, COSIGNERS_RELS_TABLE }
+module.exports = { CosignerRel, CosignerRelsSchema, CosignerRelsConstraintSchema, COSIGNERS_RELS_TABLE }
