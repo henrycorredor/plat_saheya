@@ -6,7 +6,6 @@ services:
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=contrasenia
-      - MYSQL_USER=root
       - MYSQL_DATABASE=saheya-v01
       - MYSQL_PORT=3306
     ports:
